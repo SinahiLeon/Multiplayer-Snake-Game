@@ -1,6 +1,10 @@
 ﻿// <copyright file="NetworkConnection.cs" company="UofU-CS3500">
 // Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
+// <author>
+//  Sinahi Leon and D. Mason Hair for implementation of starter code. 
+// </author>
+// <date>3/21/2025</date>
 
 using System.Net.Sockets;
 using System.Text;
