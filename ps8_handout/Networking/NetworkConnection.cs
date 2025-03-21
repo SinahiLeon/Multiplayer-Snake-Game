@@ -98,7 +98,7 @@ public sealed class NetworkConnection : IDisposable
     ///   (by using WriteLine).
     ///   If this operation can not be completed (e.g. because this NetworkConnection is not
     ///   connected), throw an InvalidOperationException.
-    /// </summary>
+    /// </summary> 
     /// <param name="message"> The string of characters to send. </param>
     public void Send( string message )
     {
