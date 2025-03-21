@@ -69,8 +69,7 @@ public sealed class NetworkConnection : IDisposable
     {
         get
         {
-            // TODO: implement this
-            throw new NotImplementedException();
+            return _tcpClient.Connected; 
         }
     }
 
@@ -82,8 +81,13 @@ public sealed class NetworkConnection : IDisposable
     /// <param name="port"> The port, e.g., 11000. </param>
     public void Connect( string host, int port )
     {
-        // TODO: implement this
-        throw new NotImplementedException();
+        try
+        {
+            _tcpClient = new TcpClient(host, port);            
+            _reader = new StreamReader(_tcpClient.GetStream(), Encoding.UTF8);
+            _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true };
+        }
+        catch {  }
     }
 
 
@@ -98,8 +102,18 @@ public sealed class NetworkConnection : IDisposable
     /// <param name="message"> The string of characters to send. </param>
     public void Send( string message )
     {
-        // TODO: Implement this
-        throw new NotImplementedException();
+        try
+        {
+            // Throws an exception if the network connection is not connected to the host so
+            // the catch block can continue with this invalid case
+            if (!IsConnected)
+                throw new InvalidOperationException();
+            _writer.WriteLine(message);
+        }
+        catch
+        {
+            throw new InvalidOperationException();
+        }
     }
 
 
@@ -112,8 +126,15 @@ public sealed class NetworkConnection : IDisposable
     /// <returns> The contents of the message. </returns>
     public string ReadLine( )
     {
-        // TODO: implement this
-        throw new NotImplementedException();
+        try
+        {
+            if (IsConnected)
+                return _reader.ReadLine(); 
+        }
+        finally
+        {
+            throw new InvalidOperationException();
+        }
 
     }
 
@@ -121,12 +142,20 @@ public sealed class NetworkConnection : IDisposable
     ///   If connected, disconnect the connection and clean 
     ///   up (dispose) any streams.
     /// </summary>
-    public void Disconnect( )
+    public void Disconnect()
     {
-        //TODO: implement this
-        throw new NotImplementedException();
-    }
+       if (IsConnected)
+        {
+            // Disconnect and clean up streams for reader
+            _reader.Dispose();
 
+            // Disconnect and clean up streams for writer
+            _writer.Dispose();
+
+            _tcpClient.Close();
+        }
+
+    }
     /// <summary>
     ///   Automatically called with a using statement (see IDisposable)
     /// </summary>
