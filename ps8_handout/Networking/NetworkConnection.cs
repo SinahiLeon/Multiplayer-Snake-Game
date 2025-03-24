@@ -69,7 +69,7 @@ public sealed class NetworkConnection : IDisposable
     {
         get
         {
-            return _tcpClient.Connected; 
+            return _tcpClient.Connected;
         }
     }
 
@@ -106,13 +106,13 @@ public sealed class NetworkConnection : IDisposable
         {
             // Throws an exception if the network connection is not connected to the host so
             // the catch block can continue with this invalid case
-            if (!IsConnected)
+            if (!IsConnected || _writer == null)
                 throw new InvalidOperationException();
             _writer.WriteLine(message);
         }
         catch
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("The write operation could not be performed.");
         }
     }
 
@@ -128,14 +128,18 @@ public sealed class NetworkConnection : IDisposable
     {
         try
         {
-            if (IsConnected)
-                return _reader.ReadLine(); 
-        }
-        finally
-        {
-            throw new InvalidOperationException();
-        }
+            //if (_reader != null && IsConnected)
+            //    return _reader.ReadLine();
 
+            if ( !IsConnected || _reader == null)
+                throw new InvalidOperationException(); // Causes the catch code to run if something is wrong.
+
+            return string.Empty + _reader.ReadLine();
+        }
+        catch
+        {
+            throw new InvalidOperationException("The line could not be read properly.");
+        }
     }
 
     /// <summary>
@@ -144,7 +148,7 @@ public sealed class NetworkConnection : IDisposable
     /// </summary>
     public void Disconnect()
     {
-       if (IsConnected)
+       if (IsConnected && _reader != null && _writer != null)
         {
             // Disconnect and clean up streams for reader
             _reader.Dispose();
