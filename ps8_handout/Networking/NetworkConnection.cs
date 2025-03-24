@@ -106,7 +106,7 @@ public sealed class NetworkConnection : IDisposable
         {
             // Throws an exception if the network connection is not connected to the host so
             // the catch block can continue with this invalid case
-            if (!IsConnected || _writer == null)
+            if (!IsConnected || _writer == null || message == string.Empty)
                 throw new InvalidOperationException();
             _writer.WriteLine(message);
         }
@@ -128,10 +128,7 @@ public sealed class NetworkConnection : IDisposable
     {
         try
         {
-            //if (_reader != null && IsConnected)
-            //    return _reader.ReadLine();
-
-            if ( !IsConnected || _reader == null)
+            if (!IsConnected || _reader == null)
                 throw new InvalidOperationException(); // Causes the catch code to run if something is wrong.
 
             return string.Empty + _reader.ReadLine();
