@@ -70,9 +70,9 @@ public sealed class NetworkConnection : IDisposable
         get
         {
             return _tcpClient.Connected;
-           
         }
     }
+    //public bool IsConnected { get; }
 
 
     /// <summary>
