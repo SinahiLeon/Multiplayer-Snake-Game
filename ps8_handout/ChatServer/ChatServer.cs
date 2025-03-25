@@ -40,7 +40,6 @@ public partial class ChatServer
         {
             var name = connection.ReadLine();
 
-            // Lock this
             lock (clients)
             {
                 clients.Add(connection);
@@ -50,25 +49,23 @@ public partial class ChatServer
             {
                 var message = connection.ReadLine();
 
-
-                //Lock this
                 lock (clients)
                 {
                     foreach (var client in clients)
                     {
-                        Thread.Sleep(10000);   //TODO remove this
+                        //Thread.Sleep(5000);   //TODO remove this
 
-                        if (client != connection)
-                        {
-                            client.Send($"{name} says: {message}");
-                        }
+                        client.Send($"{name} says: {message}");
                     }
                 }
             }
         }
         catch (Exception)
         {
-            connection.Disconnect();
+            lock (clients)
+            {
+                connection.Disconnect();
+            }
         }
     }
 }
