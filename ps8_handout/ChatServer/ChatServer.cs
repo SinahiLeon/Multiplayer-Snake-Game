@@ -32,22 +32,41 @@ public partial class ChatServer
     ///   </pre>
     /// </summary>
     ///
+    private static List<NetworkConnection> clients = new List<NetworkConnection>();
     private static void HandleConnect( NetworkConnection connection )
     {
         // handle all messages until disconnect.
         try
         {
             var name = connection.ReadLine();
-            connection.Send("Your name is " + name);
 
-            while ( true )
+            // Lock this
+            lock (clients)
             {
-                var message = connection.ReadLine( );
+                clients.Add(connection);
+            }
 
-                connection.Send( $"{name} says: {message}" );
+            while (true)
+            {
+                var message = connection.ReadLine();
+
+
+                //Lock this
+                lock (clients)
+                {
+                    foreach (var client in clients)
+                    {
+                        Thread.Sleep(10000);   //TODO remove this
+
+                        if (client != connection)
+                        {
+                            client.Send($"{name} says: {message}");
+                        }
+                    }
+                }
             }
         }
-        catch ( Exception )
+        catch (Exception)
         {
             connection.Disconnect();
         }
