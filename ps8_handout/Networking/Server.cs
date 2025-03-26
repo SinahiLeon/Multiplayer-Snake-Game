@@ -1,10 +1,14 @@
 ﻿// <copyright file="Server.cs" company="UofU-CS3500">
 // Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
-// <author>
-//  Sinahi Leon and D. Mason Hair for implementation of starter code. 
-// </author>
+// <author>Sinahi Leon and D. Mason Hair</author>
 // <date>3/21/2025</date>
+// <summary>
+// A static server class that listens for incoming TCP connections on a port.
+// When a client connects, the server invokes handler asynchronously using a new
+// thread, passing the client connection as a NetworkConnection object.
+// </summary>
+
 
 using System.Diagnostics;
 using System.Net;

@@ -1,10 +1,14 @@
 ﻿// <copyright file="NetworkConnection.cs" company="UofU-CS3500">
 // Copyright (c) 2024 UofU-CS3500. All rights reserved.
 // </copyright>
-// <author>
-//  Sinahi Leon and D. Mason Hair for implementation of starter code. 
-// </author>
+// <author>Sinahi Leon and D. Mason Hair</author>
 // <date>3/21/2025</date>
+// <summary>
+// A class that wraps a TcpClient and associated stream reader/writer, allowing us
+// to connect to a server, send messages, and read messages
+// from the network.
+// </summary>
+
 
 using System.Net.Sockets;
 using System.Text;
@@ -107,9 +111,10 @@ public sealed class NetworkConnection : IDisposable
         {
             // Throws an exception if the network connection is not connected to the host so
             // the catch block can continue with this invalid case
-            if (!IsConnected || _writer == null || message == string.Empty)
+            if (!IsConnected || _writer == null)
                 throw new InvalidOperationException();
-            _writer.WriteLine(message);
+            else if ( !message.Equals(string.Empty) )    
+                _writer.WriteLine(message);
         }
         catch
         {
@@ -132,7 +137,7 @@ public sealed class NetworkConnection : IDisposable
             if (!IsConnected || _reader == null)
                 throw new InvalidOperationException(); // Causes the catch code to run if something is wrong.
 
-            return string.Empty + _reader.ReadLine();
+            return _reader.ReadLine() ?? string.Empty;
         }
         catch
         {
