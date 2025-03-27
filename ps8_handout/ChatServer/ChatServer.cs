@@ -15,7 +15,8 @@ using System.Text;
 namespace CS3500.Chatting;
 
 /// <summary>
-///   A simple ChatServer that handles clients separately and replies with a static message.
+///   A simple ChatServer that handles clients separately and replies to each client joined based 
+///   on messages sent from each client.
 /// </summary>
 public partial class ChatServer
 {
@@ -55,27 +56,19 @@ public partial class ChatServer
 
             while (true)
             {
-               
-                    var message = connection.ReadLine();
+                var message = connection.ReadLine();
 
                 lock (clients)
                 {
                     foreach (var client in clients)
-                    {
-                        //Thread.Sleep(5000);   //TODO remove this
-
                         client.Send($"{name} says: {message}");
-                    }
                 }
             }
         }
         catch (Exception)
         {
-            lock (clients)
-            {
-                clients.Remove(connection);
-                connection.Disconnect();
-            }
+            clients.Remove(connection);
+            connection.Disconnect();
         }
     }
 }
