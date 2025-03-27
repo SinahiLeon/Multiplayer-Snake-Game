@@ -76,8 +76,6 @@ public sealed class NetworkConnection : IDisposable
             return _tcpClient.Connected;
         }
     }
-    //public bool IsConnected { get; }
-
 
     /// <summary>
     ///   Try to connect to the given host:port. 
@@ -109,11 +107,13 @@ public sealed class NetworkConnection : IDisposable
     {
         try
         {
+            string trimmedMessage = message.Trim();
+
             // Throws an exception if the network connection is not connected to the host so
             // the catch block can continue with this invalid case
             if (!IsConnected || _writer == null)
                 throw new InvalidOperationException();
-            else if ( !message.Equals(string.Empty) )    
+            else if ( !trimmedMessage.Trim().Equals(string.Empty) )    
                 _writer.WriteLine(message);
         }
         catch
@@ -130,14 +130,15 @@ public sealed class NetworkConnection : IDisposable
     ///   connected), throw an InvalidOperationException.
     /// </summary>
     /// <returns> The contents of the message. </returns>
-    public string ReadLine( )
+    public string ReadLine()
     {
         try
         {
             if (!IsConnected || _reader == null)
                 throw new InvalidOperationException(); // Causes the catch code to run if something is wrong.
 
-            return _reader.ReadLine() ?? string.Empty;
+            // Causes the catch code to run if the end of the stream is reached.
+            return _reader.ReadLine() ?? throw new InvalidOperationException();
         }
         catch
         {
@@ -153,10 +154,8 @@ public sealed class NetworkConnection : IDisposable
     {
        if (IsConnected && _reader != null && _writer != null)
         {
-            // Disconnect and clean up streams for reader
             _reader.Dispose();
 
-            // Disconnect and clean up streams for writer
             _writer.Dispose();
 
             _tcpClient.Close();
