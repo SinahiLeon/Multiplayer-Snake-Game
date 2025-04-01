@@ -1,0 +1,56 @@
+﻿@page "/snake"
+@rendermode InteractiveServer
+@using Blazor.Extensions
+@using Blazor.Extensions.Canvas
+@using Blazor.Extensions.Canvas.Canvas2D
+@using System.Numerics
+@using System.Diagnostics
+@using System.Text.Json
+@inject IJSRuntime JsRuntime;
+
+<PageTitle> Snake </PageTitle>
+
+<div id="snakeCanvas" style="position: fixed; width: 100%; height: 100%">
+    <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
+</div>
+
+@code
+{
+    private BECanvasComponent canvasReference = null!;
+    private Canvas2DContext context = null!;
+    private IJSObjectReference jsModule = null!;
+
+
+
+    protected override async Task OnAfterRenderAsync( bool firstRender )
+    {
+        if ( firstRender )
+        {
+            jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>( "import", "./Pages/SnakeGUI.razor.js" );
+            context = await canvasReference.CreateCanvas2DAsync();
+            await JsRuntime.InvokeAsync<object>( "initRenderJS", DotNetObjectReference.Create( this ) );           
+
+            // TODO: Start the game loop
+
+            // in the meantime, draw something to initialize the canvas
+            // you may want to remove this after you are drawing something
+            await context.SetFillStyleAsync( "lightblue" );
+            await context.FillRectAsync( 0, 0, 1000, 1000 );
+        }
+    }
+
+
+
+    [JSInvokable]
+    public void HandleKeyPress( string key )
+    {
+        // TODO: Once the client is connected and the handshake is complete,
+        //       invoke some controller method to send the appropriate command to the server
+
+
+        // TODO: Remove this, which is just here to show you what the 'key' string is for whatever key you pressed
+        Debug.WriteLine("key pressed: " + key);
+    }
+
+}
+
