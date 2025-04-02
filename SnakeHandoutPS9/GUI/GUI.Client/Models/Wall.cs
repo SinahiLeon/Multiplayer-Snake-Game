@@ -14,18 +14,24 @@ public class Wall
     ///   Property storing the wall ID for access.
     /// </summary>
     [JsonPropertyName("wall")]
+    [JsonRequired]
+    [JsonInclude]
     public int ID { get; private set; }
 
     /// <summary>
     ///   Point2D object representing the first endpoint of the wall.
     /// </summary>
     [JsonPropertyName("p1")]
+    [JsonRequired]
+    [JsonInclude]
     public Point2D P1 { get; set; }
 
     /// <summary>
     ///   Point2D object representing the second endpoint of the wall.
     /// </summary>
     [JsonPropertyName("p2")]
+    [JsonRequired]
+    [JsonInclude]
     public Point2D P2 { get; set; } 
 
     /// <summary>
@@ -39,4 +45,16 @@ public class Wall
         P2 = new();
     }
 
+    /// <summary>
+    ///   Constructs a wall with the given parameters.
+    /// </summary>
+    /// <param name="wall"> The id of the wall being input. </param>
+    /// <param name="p1"> The first endpoint of the wall. </param>
+    /// <param name="p2"> The second endpoint of the wall. </param>
+    public Wall(int wall, Point2D p1, Point2D p2)
+    {
+        ID = wall;
+        P1 = p1;
+        P2 = p2;
+    }
 }
