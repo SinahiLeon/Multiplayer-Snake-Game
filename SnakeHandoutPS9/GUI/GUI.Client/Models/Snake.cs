@@ -19,13 +19,13 @@ public class Snake
     /// Property storing the snake name
     /// </summary>
     [JsonPropertyName("name")]
-    public string Name { get; set; } = "";
+    public string Name { get; set; } 
 
     /// <summary>
-    /// 
+    /// Property storing the 
     /// </summary>
     [JsonPropertyName("body")]
-    public List<Point2D> Body { get; set; } = new();
+    public List<Point2D> Body { get; private set; } 
 
 
 }

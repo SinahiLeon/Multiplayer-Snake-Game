@@ -113,7 +113,7 @@ public sealed class NetworkConnection : IDisposable
             // the catch block can continue with this invalid case
             if (!IsConnected || _writer == null)
                 throw new InvalidOperationException();
-            else if ( !trimmedMessage.Trim().Equals(string.Empty) )    
+            else if ( !trimmedMessage.Equals(string.Empty) )    
                 _writer.WriteLine(message);
         }
         catch

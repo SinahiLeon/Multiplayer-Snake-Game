@@ -1,6 +1,7 @@
 ﻿namespace GUI.Client.Models;
 
 using System;
+using System.Text.Json.Serialization;
 
 /// <summary>
 ///   An object storing X and Y coordinates for 2D space.
@@ -8,20 +9,28 @@ using System;
 public class Point2D
 {
 
-	/// <summary>
-	///   The X coordinate in 2D space.
-	/// </summary>
-	public int X {  get; set; }
+    /// <summary>
+    ///   The X coordinate in 2D space.
+    /// </summary>
+    [JsonRequired]
+    [JsonInclude] 
+    public int X {  get; set; }
 
     /// <summary>
     ///   The Y coordinate in 2D space.
     /// </summary>
+    [JsonRequired]
+    [JsonInclude]
     public int Y { get; set; }
 
 	/// <summary>
 	///   Constructs a Point2D object with X=0 and Y=0.
 	/// </summary>
-	public Point2D() { }
+	public Point2D()
+	{
+		X = 0;
+		Y = 0;
+	}
 
     /// <summary>
     ///   Constructs a Point2D object with the given X and Y parameters.
