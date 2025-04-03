@@ -42,17 +42,4 @@ public class Powerup
         Location = new();
         IsCollected = false;
     }
-
-    /// <summary>
-    /// Argument constructor that constructs a new powerup with the defined parameters.
-    /// </summary>
-    /// <param name="id">int representing ID for each powerup</param>
-    /// <param name="loc">Point2D representing the location for this powerup</param>
-    /// <param name="died">Boolean that is true if the powerup has been collected</param>
-    public Powerup(int id, Point2D loc, bool died)
-    {
-        ID = id;
-        Location = loc;
-        IsCollected = died;
-    }
 }

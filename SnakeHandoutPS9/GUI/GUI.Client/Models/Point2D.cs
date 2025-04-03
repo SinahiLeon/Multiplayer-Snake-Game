@@ -31,15 +31,4 @@ public class Point2D
 		X = 0;
 		Y = 0;
 	}
-
-    /// <summary>
-    ///   Constructs a Point2D object with the given X and Y parameters.
-    /// </summary>
-    /// <param name="x"> Integer representing the X coordinate. </param>
-    /// <param name="y"> Integer representing the Y coordinate. </param>
-    public Point2D(int x, int y)
-	{
-		X = x;
-		Y = y;
-	}
 }

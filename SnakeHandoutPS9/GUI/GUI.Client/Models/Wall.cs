@@ -44,17 +44,4 @@ public class Wall
         P1 = new();
         P2 = new();
     }
-
-    /// <summary>
-    ///   Constructs a wall with the given parameters.
-    /// </summary>
-    /// <param name="wall"> The id of the wall being input. </param>
-    /// <param name="p1"> The first endpoint of the wall. </param>
-    /// <param name="p2"> The second endpoint of the wall. </param>
-    public Wall(int wall, Point2D p1, Point2D p2)
-    {
-        ID = wall;
-        P1 = p1;
-        P2 = p2;
-    }
 }

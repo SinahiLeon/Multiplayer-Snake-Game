@@ -109,30 +109,6 @@ public class Snake
         DidDisconnect = false;
         DidConnect = false;
     }
-
-    /// <summary>
-    ///   Creates a snake with the provided paramters.
-    /// </summary>
-    public Snake(int snake, 
-        string name, 
-        List<Point2D> body, 
-        Point2D dir, 
-        int score, 
-        bool died, 
-        bool alive, 
-        bool dc, 
-        bool join)
-    {
-        ID = snake;
-        Name = name;
-        Body = body;
-        Direction = dir;
-        Score = score;
-        Died = died;
-        Alive = alive;
-        DidDisconnect = dc;
-        DidConnect = join;
-    }
 }
 
 
