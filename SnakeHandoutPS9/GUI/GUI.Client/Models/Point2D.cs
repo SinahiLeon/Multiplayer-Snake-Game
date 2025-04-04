@@ -1,4 +1,10 @@
-﻿namespace GUI.Client.Models;
+﻿// <summary>
+//   An object storing X and Y coordinates for 2D space.
+// </summary>
+// <author> D. Mason Hair and Sinahi Leon </author>
+// <data> 4/3/2025 </date>
+
+namespace GUI.Client.Models;
 
 using System;
 using System.Text.Json.Serialization;

@@ -1,4 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿// <summary>
+//   Stores the required data for a powerup including its 
+//   ID, whether it died, and its coordinates as a Point2D object.
+// </summary>
+// <author> D. Mason Hair and Sinahi Leon </author>
+// <data> 4/3/2025 </date>
+
+using System.Text.Json.Serialization;
 
 namespace GUI.Client.Models;
 

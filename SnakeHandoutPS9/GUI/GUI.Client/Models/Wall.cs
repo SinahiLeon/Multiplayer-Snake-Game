@@ -1,4 +1,11 @@
-﻿namespace GUI.Client.Models;
+﻿// <summary>
+//   This class represents the data used for a wall object. 
+//   Includes the ID and the start and endpoints of the wall.
+// </summary>
+// <author> D. Mason Hair and Sinahi Leon </author>
+// <data> 4/3/2025 </date>
+
+namespace GUI.Client.Models;
 
 using System;
 using System.Text.Json.Serialization;

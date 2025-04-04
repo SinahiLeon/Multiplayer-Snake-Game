@@ -1,4 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿// <summary>
+//   This class represents all the data required to 
+//   indicate the state of the snake and all data
+//   required to draw the snake.
+// </summary>
+// <author> D. Mason Hair and Sinahi Leon </author>
+// <data> 4/3/2025 </date>
+
+using System.Text.Json.Serialization;
 
 namespace GUI.Client.Models;
 
