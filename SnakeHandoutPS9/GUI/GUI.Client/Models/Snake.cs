@@ -23,7 +23,7 @@ public class Snake
     [JsonPropertyName("name")]
     [JsonRequired]
     [JsonInclude]
-    public string Name { get; set; } 
+    public string Name { get; private set; } 
 
     /// <summary>
     /// Property storing a list of all vertices that make of the snake.
@@ -39,7 +39,7 @@ public class Snake
     [JsonPropertyName("dir")]
     [JsonRequired]
     [JsonInclude]
-    public Point2D Direction { get; set; }
+    public Point2D Direction { get; private set; }
 
     /// <summary>
     ///   An integer representing the player's score (i.e. the number of powerups eaten).
@@ -47,7 +47,7 @@ public class Snake
     [JsonPropertyName("score")]
     [JsonRequired]
     [JsonInclude]
-    public int Score { get; set; }
+    public int Score { get; private set; }
 
     /// <summary>
     ///   Indicates that the snake has died (single event) on the frame that the 
@@ -56,7 +56,7 @@ public class Snake
     [JsonPropertyName("died")]
     [JsonRequired]
     [JsonInclude]
-    public bool Died { get; set; }
+    public bool Died { get; private set; }
 
     /// <summary>
     ///   A boolean indicating whether the snake is actively dead or alive so that it 
@@ -65,7 +65,7 @@ public class Snake
     [JsonPropertyName("alive")]
     [JsonRequired]
     [JsonInclude]
-    public bool Alive { get; set; }
+    public bool Alive { get; private set; }
 
     /// <summary>
     ///   Boolean indicating that the player has disconnected on the frame sent by the 
@@ -74,7 +74,7 @@ public class Snake
     [JsonPropertyName("dc")]
     [JsonRequired]
     [JsonInclude]
-    public bool DidDisconnect { get; set; }
+    public bool DidDisconnect { get; private set; }
 
     /// <summary>
     ///   Boolean indicating that the player has connected on the frame sent by the 
@@ -83,7 +83,7 @@ public class Snake
     [JsonPropertyName("join")]
     [JsonRequired]
     [JsonInclude]
-    public bool DidConnect { get; set; }
+    public bool DidConnect { get; private set; }
 
     /// <summary>
     ///   Creates a snake with the following default values:

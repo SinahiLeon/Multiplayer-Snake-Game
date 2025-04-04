@@ -24,7 +24,7 @@ public class Wall
     [JsonPropertyName("p1")]
     [JsonRequired]
     [JsonInclude]
-    public Point2D P1 { get; set; }
+    public Point2D P1 { get; private set; }
 
     /// <summary>
     ///   Point2D object representing the second endpoint of the wall.
@@ -32,7 +32,7 @@ public class Wall
     [JsonPropertyName("p2")]
     [JsonRequired]
     [JsonInclude]
-    public Point2D P2 { get; set; } 
+    public Point2D P2 { get; private set; } 
 
     /// <summary>
     ///   Constructs a wall with a default starting and endpoints 

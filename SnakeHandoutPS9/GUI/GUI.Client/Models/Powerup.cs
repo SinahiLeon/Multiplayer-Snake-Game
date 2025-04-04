@@ -22,7 +22,7 @@ public class Powerup
     [JsonPropertyName("loc")]
     [JsonRequired]
     [JsonInclude]
-    public Point2D Location { get; set; }
+    public Point2D Location { get; private set; }
 
     /// <summary>
     ///   Boolean indicating if a powerup was collected by the player.
@@ -30,7 +30,7 @@ public class Powerup
     [JsonPropertyName("died")]
     [JsonRequired]
     [JsonInclude]
-    public bool IsCollected { get; set; }
+    public bool IsCollected { get; private set; }
 
     /// <summary>
     ///   Zero argument constructor that constructs a powerup with default values:

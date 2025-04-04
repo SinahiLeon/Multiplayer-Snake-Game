@@ -14,14 +14,14 @@ public class Point2D
     /// </summary>
     [JsonRequired]
     [JsonInclude] 
-    public int X {  get; set; }
+    public int X {  get; private set; }
 
     /// <summary>
     ///   The Y coordinate in 2D space.
     /// </summary>
     [JsonRequired]
     [JsonInclude]
-    public int Y { get; set; }
+    public int Y { get; private set; }
 
 	/// <summary>
 	///   Constructs a Point2D object with X=0 and Y=0.
