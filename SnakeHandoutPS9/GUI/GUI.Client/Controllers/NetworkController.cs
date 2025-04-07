@@ -44,10 +44,6 @@ public class NetworkController
         clientConnection = new NetworkConnection();
     }
 
-
-    // TODO FINISH: Make a connect method to connect to the server so that the controller can begin communicating with the server.
-
-
     /// <summary>
     ///   Try to connect to the given host:port. 
     /// </summary>
@@ -63,6 +59,7 @@ public class NetworkController
 
             int playerID = int.Parse(clientConnection.ReadLine());
             int worldSize = int.Parse(clientConnection.ReadLine());
+            string nextLine = string.Empty;
 
             // Loop runs as long as walls are received and breaks when first non-wall object is sent from server. 
             while (true)
@@ -70,20 +67,90 @@ public class NetworkController
                 try
                 {
                     // Assuming server will not send null hence, wall is nullable here
-                    Wall? wall = JsonSerializer.Deserialize<Wall>(clientConnection.ReadLine());     
+                    nextLine = clientConnection.ReadLine();
+                    Wall? wall = JsonSerializer.Deserialize<Wall>(nextLine);
+                    if (wall != null)
+                    {
+                        lock (world)
+                            world.Walls[wall.ID] = wall;
+                    }
                 }
-                catch {
+                catch 
+                {
                     break;
                 }
             }
 
-
+            AddSnakeOrPowerup(nextLine);
+            HandleServer();
         }
         catch { }
     }
+
+    /// <summary>
+    ///   Requests that the server change the state of the client's snake. This method takes 
+    ///   either left, right, up, down, or none in lowercase form as strings. Based on the given 
+    ///   parameter, a request will be made to the server via this controller.
+    /// </summary>
+    /// <param name="command"> 
+    ///   This enables the GUI to send server requests via simple string command which are: 
+    ///   "left", "right", "up", "down", and "none" in this form.
+    /// </param>
+    public void CommandRequest(string command)
+    {
+        // TODO: Consider enums.
+    }
+
+    /// <summary>
+    ///   Handles the input from the server and updates the model accordingly.
+    /// </summary>
     private void HandleServer()
     {
+        try
+        {
+            while (true)
+            {
+                var json = clientConnection.ReadLine();
 
+                AddSnakeOrPowerup(json);
+            }
+        } catch { }
     }
     
+    /// <summary>
+    ///   Attempts to add the deserialized JSON to the world. Expects the JSON to either 
+    ///   be a powerup or a snake. If the given JSON is neither, the world will not be 
+    ///   updated.
+    /// </summary>
+    /// <param name="json">
+    ///   JSON string representing either a powerup or snake object.
+    /// </param>
+    private void AddSnakeOrPowerup(string json)
+    {
+        // Tries to deserialize the given json as a powerup. If that fails, tries to
+        // deserialize as a snake. If that fails, do nothing. In all cases where
+        // deserialization is successful, adds the new object to the world.
+        try
+        {
+            Powerup? powerup = JsonSerializer.Deserialize<Powerup>(json);
+            if (powerup != null)
+            {
+                lock (world)
+                    world.Powerups[powerup.ID] = powerup;
+            }
+        }
+        catch
+        {
+            try
+            {
+                Snake? snake = JsonSerializer.Deserialize<Snake>(json);
+                if (snake != null)
+                {
+                    lock (world)
+                        world.Snakes[snake.ID] = snake;
+                }
+            }
+            catch { }
+        }
+    }
 }
