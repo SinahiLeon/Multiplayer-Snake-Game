@@ -6,6 +6,8 @@
 @using System.Numerics
 @using System.Diagnostics
 @using System.Text.Json
+@using GUI.Client.Controllers
+@using GUI.Client.Models
 @inject IJSRuntime JsRuntime;
 
 <PageTitle> Snake </PageTitle>
@@ -16,6 +18,26 @@
 
 @code
 {
+
+    /// <summary>
+    /// Width of the display canvas
+    /// </summary>
+    private const int ViewWidth = 1000;
+
+    /// <summary>
+    /// Height of the display canvas
+    /// </summary>
+    private const int ViewHeight = 1000;
+
+    /// <summary>
+    /// World object our player is in.
+    /// </summary>
+    private World world = new();
+
+    public World(){
+
+    }
+
     private BECanvasComponent canvasReference = null!;
     private Canvas2DContext context = null!;
     private IJSObjectReference jsModule = null!;
@@ -28,9 +50,10 @@
         {
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>( "import", "./Pages/SnakeGUI.razor.js" );
             context = await canvasReference.CreateCanvas2DAsync();
-            await JsRuntime.InvokeAsync<object>( "initRenderJS", DotNetObjectReference.Create( this ) );           
+            await JsRuntime.InvokeAsync<object>( "initRenderJS", DotNetObjectReference.Create( this ) );
 
             // TODO: Start the game loop
+            GameLoop();
 
             // in the meantime, draw something to initialize the canvas
             // you may want to remove this after you are drawing something
@@ -52,5 +75,37 @@
         Debug.WriteLine("key pressed: " + key);
     }
 
+    /// <summary>
+    /// Renders the view once every 20 milliseconds (50 frames/second)
+    /// </summary>
+    private async void GameLoop()
+    {
+        while (true)
+        {
+            Thread.Sleep(20);
+            await DrawFrame();
+        }
+
+    }
+
+    private async Task DrawFrame(){
+        if (world.Snakes.containsKey)
+        // clip the view so that objects drawn outside the canvas will not be shown
+        await context.BeginPathAsync();
+        await context.RectAsync(0, 0, ViewWidth, ViewHeight);
+        await context.ClipAsync();
+
+        // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
+        await context.SaveAsync();
+
+
+        // Center on origin, move to center of view port
+        await context.TranslateAsync(ViewWidth / 2, ViewHeight / 2);
+        await context.TranslateAsync(-head.X, -head.Y);
+
+        // Draw the background:
+        await context.DrawImageAsync(backgroundImage, -world.Width / 2, -world.Height / 2, world.Width, world.Height);
+
+    }
 }
 
