@@ -58,7 +58,11 @@ public class NetworkController
             clientConnection.Send(playerName.Trim());
 
             int playerID = int.Parse(clientConnection.ReadLine());
+            lock(world)
+                world.PlayerID = playerID;
             int worldSize = int.Parse(clientConnection.ReadLine());
+            lock(world)
+                world.Size = worldSize;
             string nextLine = string.Empty;
 
             // Loop runs as long as walls are received and breaks when first non-wall object is sent from server. 
@@ -71,7 +75,7 @@ public class NetworkController
                     Wall? wall = JsonSerializer.Deserialize<Wall>(nextLine);
                     if (wall != null)
                     {
-                        lock (world)
+                        lock(world)
                             world.Walls[wall.ID] = wall;
                     }
                 }
@@ -89,16 +93,17 @@ public class NetworkController
 
     /// <summary>
     ///   Requests that the server change the state of the client's snake. This method takes 
-    ///   either left, right, up, down, or none in lowercase form as strings. Based on the given 
+    ///   either LEFT, RIGHT, UP, DOWN, or NONE from the Direction enum. Based on the given 
     ///   parameter, a request will be made to the server via this controller.
     /// </summary>
-    /// <param name="command"> 
-    ///   This enables the GUI to send server requests via simple string command which are: 
-    ///   "left", "right", "up", "down", and "none" in this form.
+    /// <param name="direction"> 
+    ///   This enables the GUI to send server requests via a direction enum. The specfic direction 
+    ///   chosen will represent the command to be sent.
     /// </param>
-    public void CommandRequest(string command)
+    public void CommandRequest(Direction direction)
     {
-        // TODO: Consider enums.
+        string directionStringForm = direction.ToString().ToLower();
+        clientConnection.Send("{\"moving\":\"" + directionStringForm + "\"}");
     }
 
     /// <summary>
@@ -135,7 +140,7 @@ public class NetworkController
             Powerup? powerup = JsonSerializer.Deserialize<Powerup>(json);
             if (powerup != null)
             {
-                lock (world)
+                lock(world)
                     world.Powerups[powerup.ID] = powerup;
             }
         }
@@ -146,7 +151,7 @@ public class NetworkController
                 Snake? snake = JsonSerializer.Deserialize<Snake>(json);
                 if (snake != null)
                 {
-                    lock (world)
+                    lock(world)
                         world.Snakes[snake.ID] = snake;
                 }
             }

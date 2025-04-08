@@ -27,7 +27,7 @@ namespace GUI.Client.Models;
     /// <summary>
     /// Stores an int that represents the size of the world. 
     /// </summary>
-    public int Size { get; private set; }
+    public int Size { get; set; }
 
     /// <summary>
     /// Dictionary where the snake's int ID is the key and the Snake object is the value.
