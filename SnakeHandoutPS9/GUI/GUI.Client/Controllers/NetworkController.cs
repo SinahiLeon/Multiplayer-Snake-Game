@@ -35,6 +35,16 @@ public class NetworkController
     private World world;
 
     /// <summary>
+    /// Returns whether the client is connected or not.
+    /// </summary>
+    public bool IsConnected { 
+        get
+        {
+            return clientConnection.IsConnected;
+        } 
+    }
+
+    /// <summary>
     ///   Builds a new NetworkController class. With a new connection used by the GUI.
     /// </summary>
     /// /// <param name="world"> World used by this controller and the GUI </param>
