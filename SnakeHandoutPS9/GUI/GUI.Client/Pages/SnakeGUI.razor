@@ -16,6 +16,10 @@
     <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
 </div>
 
+<img @ref="backgroundImage" id="bgImage" src="image/Sand Background.png" alt="image" style="display:none;" />
+
+<img @ref="wallImage" id="bgImage" src="image/Limestone Wall Tile Texture.png" alt="image" style="display:none;" />
+
 @code
 {
 
@@ -34,13 +38,13 @@
     /// </summary>
     private World world = new();
 
-    public World(){
-
-    }
-
     private BECanvasComponent canvasReference = null!;
     private Canvas2DContext context = null!;
     private IJSObjectReference jsModule = null!;
+
+    private ElementReference backgroundImage;
+    private ElementReference wallImage;
+
 
 
 
@@ -88,8 +92,24 @@
 
     }
 
+    /// <summary>
+    ///   Draws the current state of the game in the game display canvas.
+    /// </summary>
+    /// <returns> Returns a Task object. TODO REMOVE? </returns>
     private async Task DrawFrame(){
-        if (world.Snakes.containsKey)
+        // Batch is called here so that the early return doesn't prevent other operations from occuring.
+        await context.BeginBatchAsync();        
+        if (!world.Snakes.ContainsKey(world.PlayerID))
+        {
+            await context.EndBatchAsync();
+            return;
+        }
+
+        // Copy the world so that it can be drawn without being interrupted.
+        World worldCopy;
+        lock (world)
+            worldCopy = new(world);
+
         // clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
         await context.RectAsync(0, 0, ViewWidth, ViewHeight);
@@ -100,12 +120,14 @@
 
 
         // Center on origin, move to center of view port
+        Snake player = worldCopy.Snakes[worldCopy.PlayerID];
         await context.TranslateAsync(ViewWidth / 2, ViewHeight / 2);
-        await context.TranslateAsync(-head.X, -head.Y);
+        await context.TranslateAsync(-player.Head.X, -player.Head.Y);
 
         // Draw the background:
-        await context.DrawImageAsync(backgroundImage, -world.Width / 2, -world.Height / 2, world.Width, world.Height);
+        await context.DrawImageAsync(backgroundImage, -world.Size / 2, -world.Size / 2, world.Size, world.Size);
 
+        await context.EndBatchAsync();
     }
 }
 
