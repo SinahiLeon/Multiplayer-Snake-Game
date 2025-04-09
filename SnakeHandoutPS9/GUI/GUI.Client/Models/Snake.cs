@@ -42,6 +42,18 @@ public class Snake
     public List<Point2D> Body { get; private set; }
 
     /// <summary>
+    ///   Returns the Point2D where the head of this snake is.
+    /// </summary>
+    [JsonIgnore]
+    public Point2D Head 
+    {
+        get
+        {
+            return Body[Body.Count]; // Gets the last index in O(1) time.
+        }
+    }
+
+    /// <summary>
     ///   Represents the snakes orientation in the form of a Point2D object.
     /// </summary>
     [JsonPropertyName("dir")]
