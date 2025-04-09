@@ -12,9 +12,27 @@
 
 <PageTitle> Snake </PageTitle>
 
+<div class="input-row">
+    <label for="url"> Server Address: </label>
+    <input id="url" disabled="@controller.IsConnected" type="text" @bind="ServerNameOrAddress" />
+    <label for="url"> Port: </label>
+    <input id="port" disabled="@network.IsConnected" type="number" @bind="ServerPort" class="port" />
+    @if (network.IsConnected)
+    {
+        <button class="btn btn-primary" @onclick="DisconnectFromServer">Disconnect</button>
+    }
+    else
+    {
+        <button class="btn btn-primary" @onclick="ConnectToServer">Connect</button>
+    }
+</div>
+
+
+
 <div id="snakeCanvas" style="position: fixed; width: 100%; height: 100%">
     <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
 </div>
+
 
 <img @ref="backgroundImage" id="bgImage" src="image/Sand Background.png" alt="image" style="display:none;" />
 
@@ -38,6 +56,13 @@
     /// </summary>
     private World world = new();
 
+    /// <summary>
+    /// Controller object that receives information from the 
+    /// server and updates the model. The GUI can send 
+    /// requests to this controller to update the game state.
+    /// </summary>
+    private NetworkController controller = null!;
+
     private BECanvasComponent canvasReference = null!;
     private Canvas2DContext context = null!;
     private IJSObjectReference jsModule = null!;
@@ -55,6 +80,7 @@
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>( "import", "./Pages/SnakeGUI.razor.js" );
             context = await canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>( "initRenderJS", DotNetObjectReference.Create( this ) );
+            controller = new(world);
 
             // TODO: Start the game loop
             GameLoop();
@@ -71,9 +97,15 @@
     [JSInvokable]
     public void HandleKeyPress( string key )
     {
-        // TODO: Once the client is connected and the handshake is complete,
-        //       invoke some controller method to send the appropriate command to the server
-
+        switch(key)
+        {
+            case "ArrowUp" : controller.CommandRequest(Direction.UP); break;
+            case "ArrowDown" : controller.CommandRequest(Direction.DOWN); break;
+            case "ArrowLeft" : controller.CommandRequest(Direction.LEFT); break;
+            case "ArrowRight" : controller.CommandRequest(Direction.RIGHT); break;
+            default : controller.CommandRequest(Direction.NONE); break;
+          
+        }
 
         // TODO: Remove this, which is just here to show you what the 'key' string is for whatever key you pressed
         Debug.WriteLine("key pressed: " + key);
