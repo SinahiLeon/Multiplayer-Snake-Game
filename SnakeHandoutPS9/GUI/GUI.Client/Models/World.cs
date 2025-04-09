@@ -48,10 +48,8 @@ namespace GUI.Client.Models;
     /// <summary>
     /// Creates a new world with the given size
     /// </summary>
-    /// <param name="size"> size of the world to be constructed </param>
-    public World(int size)
+    public World()
     {
-        Size = size;
         Snakes = new Dictionary<int, Snake>();
         Walls = new Dictionary<int, Wall>();
         Powerups = new Dictionary<int, Powerup>();
