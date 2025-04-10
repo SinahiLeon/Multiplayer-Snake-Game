@@ -137,12 +137,22 @@
 
     }
 
+    /// <summary>
+    /// Draws the given wall.
+    /// </summary>
+    /// <param name="wall"> The wall to be draw. </param>
+    /// <returns> Task used for await purposes. </returns>
     private async Task DrawWall(Wall wall){
         int start;
         int end;
+
+        // Ensures the walls are drawn with the centers in the correct place.
+        int wallOffset = WallWidth / 2;
+
         if (wall.P1.X == wall.P2.X) // Assume the wall are vertical
         {
-            if(wall.P1.Y > wall.P2.Y){
+            if(wall.P1.Y > wall.P2.Y)
+            {
                 start = wall.P2.Y;
                 end = wall.P1.Y;
 
@@ -151,11 +161,12 @@
                 start = wall.P1.Y;
                 end = wall.P2.Y;
             }
-            for (int y = start; y < end; y += WallWidth){
-                await context.DrawImageAsync(wallImage, wall.P1.X, y, WallWidth, WallWidth);
+            for (int y = start; y <= end; y += WallWidth){
+                await context.DrawImageAsync(wallImage, wall.P1.X - wallOffset, y - wallOffset, WallWidth, WallWidth);
             }
         }
-        else {  // Assume the walls are horizontal
+        else // Assume the walls are horizontal
+        {  
             if (wall.P1.X > wall.P2.X)
             {
                 start = wall.P2.X;
@@ -167,11 +178,48 @@
                 start = wall.P1.X;
                 end = wall.P2.X;
             }
-            for (int x = start; x < end; x += WallWidth)
+            for (int x = start; x <= end; x += WallWidth)
             {
-                await context.DrawImageAsync(wallImage, x, wall.P1.Y, WallWidth, WallWidth);
+                await context.DrawImageAsync(wallImage, x - wallOffset, wall.P1.Y - wallOffset, WallWidth, WallWidth);
             }
 
+        }
+    }
+
+    /// <summary>
+    ///  TODO
+    /// </summary>
+    /// <param name="snake"></param>
+    /// <returns></returns>
+    private async Task DrawSnake(Snake snake)
+    {
+        Point2D previousSegment = snake.Body[0];
+
+        for (int index = 1; index < snake.Body.Count; index++)
+        {
+            Point2D currentSegment = snake.Body[index];
+
+            // Draw tail
+            await context.SetLineWidthAsync(6);
+            await context.SetStrokeStyleAsync($"rgb(0, 0, 240)");
+            await context.BeginPathAsync();
+            await context.ArcAsync(previousSegment.X, previousSegment.Y, 2, 0, 2 * Math.PI);
+            await context.StrokeAsync();
+
+            // Draw body in middle
+            await context.SetLineWidthAsync(10);
+            await context.BeginPathAsync();
+            await context.MoveToAsync(previousSegment.X, previousSegment.Y);
+            await context.LineToAsync(currentSegment.X, currentSegment.Y);
+            await context.StrokeAsync();
+
+            // Draw head
+            await context.SetLineWidthAsync(6);
+            await context.BeginPathAsync();
+            await context.ArcAsync(currentSegment.X, currentSegment.Y, 2, 0, 2 * Math.PI);
+            await context.StrokeAsync();
+
+            previousSegment = currentSegment;
         }
     }
 
@@ -220,6 +268,9 @@
         foreach(Wall wall in worldCopy.Walls.Values){
             await DrawWall(wall);
         }
+
+        foreach (Snake snake in worldCopy.Snakes.Values)
+            await DrawSnake(snake);
 
         // Because we are modifying the transformation matrix, we need to restore it
         await context.RestoreAsync();
