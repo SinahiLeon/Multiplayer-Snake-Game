@@ -46,7 +46,7 @@ namespace GUI.Client.Models;
     public Dictionary<int, Powerup> Powerups { get; private set; }
 
     /// <summary>
-    /// Creates a new world with the given size
+    /// Creates a new empty world ready to be initialized by the controller.
     /// </summary>
     public World()
     {
