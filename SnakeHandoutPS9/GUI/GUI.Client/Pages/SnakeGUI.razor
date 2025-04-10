@@ -110,12 +110,11 @@
     {
         switch(key)
         {
-            case "ArrowUp" : controller.CommandRequest(Direction.UP); break;
-            case "ArrowDown" : controller.CommandRequest(Direction.DOWN); break;
-            case "ArrowLeft" : controller.CommandRequest(Direction.LEFT); break;
-            case "ArrowRight" : controller.CommandRequest(Direction.RIGHT); break;
+            case "w" : controller.CommandRequest(Direction.UP); break;
+            case "s" : controller.CommandRequest(Direction.DOWN); break;
+            case "a" : controller.CommandRequest(Direction.LEFT); break;
+            case "d" : controller.CommandRequest(Direction.RIGHT); break;
             default : controller.CommandRequest(Direction.NONE); break;
-
         }
 
         // TODO: Remove this, which is just here to show you what the 'key' string is for whatever key you pressed
@@ -179,6 +178,7 @@
         // Draw the background:
         await context.DrawImageAsync(backgroundImage, -worldCopy.Size / 2, -worldCopy.Size / 2, worldCopy.Size, worldCopy.Size);
 
+        // Because we are modifying the transformation matrix, we need to restore it
         await context.RestoreAsync();
 
         await context.EndBatchAsync();
