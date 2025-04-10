@@ -34,7 +34,8 @@ public class Snake
     public string Name { get; private set; } 
 
     /// <summary>
-    /// Property storing a list of all vertices that make of the snake.
+    /// Property storing a list of all vertices that make the snake. 
+    /// The first point is the tail and the last point in the list is the head.
     /// </summary>
     [JsonPropertyName("body")]
     [JsonRequired]
