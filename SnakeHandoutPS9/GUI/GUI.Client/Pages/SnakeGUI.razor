@@ -68,6 +68,11 @@
     private const int ViewHeight = 1000;
 
     /// <summary>
+    /// Constant width of each wall
+    /// </summary>
+    private const int WallWidth = 50;
+
+    /// <summary>
     /// World object our player is in.
     /// </summary>
     private World world = new();
@@ -98,11 +103,9 @@
             await JsRuntime.InvokeAsync<object>( "initRenderJS", DotNetObjectReference.Create( this ) );
             controller = new(world);
 
-            // TODO: Start the game loop
             GameLoop();
         }
     }
-
 
 
     [JSInvokable]
@@ -134,6 +137,44 @@
 
     }
 
+    private async Task DrawWall(Wall wall){
+        int start;
+        int end;
+        if (wall.P1.X == wall.P2.X) // Assume the wall are vertical
+        {
+            if(wall.P1.Y > wall.P2.Y){
+                start = wall.P2.Y;
+                end = wall.P1.Y;
+
+            }
+            else{
+                start = wall.P1.Y;
+                end = wall.P2.Y;
+            }
+            for (int y = start; y < end; y += WallWidth){
+                await context.DrawImageAsync(wallImage, wall.P1.X, y, WallWidth, WallWidth);
+            }
+        }
+        else {  // Assume the walls are horizontal
+            if (wall.P1.X > wall.P2.X)
+            {
+                start = wall.P2.X;
+                end = wall.P1.X;
+
+            }
+            else
+            {
+                start = wall.P1.X;
+                end = wall.P2.X;
+            }
+            for (int x = start; x < end; x += WallWidth)
+            {
+                await context.DrawImageAsync(wallImage, x, wall.P1.Y, WallWidth, WallWidth);
+            }
+
+        }
+    }
+
     /// <summary>
     ///   Draws the current state of the game in the game display canvas.
     /// </summary>
@@ -145,30 +186,28 @@
             worldCopy = new(world);
 
 
-        await context.SetFillStyleAsync("lightblue");
-        await context.FillRectAsync(0, 0, 1000, 1000);
+
         // Batch is called here so that the early return doesn't prevent other operations from occuring.
-             
+        await context.BeginBatchAsync();
+
         if (!worldCopy.Snakes.ContainsKey(worldCopy.PlayerID))
         {
-           // await context.EndBatchAsync();
+            await context.EndBatchAsync();
             return;
         }
-        await context.BeginBatchAsync();
+
+        // Draws the light blue canvas behind our game's background.
+        await context.SetFillStyleAsync("lightblue");
+        await context.FillRectAsync(0, 0, ViewWidth, ViewHeight);
 
         // clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
-        // in the meantime, draw something to initialize the canvas
-        // you may want to remove this after you are drawing something
-
 
         await context.RectAsync(0, 0, ViewWidth, ViewHeight);
         await context.ClipAsync();
 
-
         // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
         await context.SaveAsync();
-
 
         // Center on origin, move to center of view port
         Snake player = worldCopy.Snakes[worldCopy.PlayerID];
@@ -178,11 +217,14 @@
         // Draw the background:
         await context.DrawImageAsync(backgroundImage, -worldCopy.Size / 2, -worldCopy.Size / 2, worldCopy.Size, worldCopy.Size);
 
+        foreach(Wall wall in worldCopy.Walls.Values){
+            await DrawWall(wall);
+        }
+
         // Because we are modifying the transformation matrix, we need to restore it
         await context.RestoreAsync();
 
         await context.EndBatchAsync();
-
 
         StateHasChanged();
     }
