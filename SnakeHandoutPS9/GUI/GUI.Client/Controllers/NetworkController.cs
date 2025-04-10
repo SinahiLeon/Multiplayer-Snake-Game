@@ -35,6 +35,12 @@ public class NetworkController
     private World world;
 
     /// <summary>
+    ///   Determines whether the world has walls, a player ID, and world 
+    ///   size for this session after connecting to the server.
+    /// </summary>
+    private bool worldInitialized;
+
+    /// <summary>
     /// Returns whether the client is connected or not.
     /// </summary>
     public bool IsConnected { 
@@ -47,7 +53,7 @@ public class NetworkController
     /// <summary>
     ///   Builds a new NetworkController class. With a new connection used by the GUI.
     /// </summary>
-    /// /// <param name="world"> World used by this controller and the GUI </param>
+    /// <param name="world"> World used by this controller and the GUI </param>
     public NetworkController(World world)
     {
         this.world = world;
@@ -95,6 +101,7 @@ public class NetworkController
                 }
             }
 
+            worldInitialized = true; // Allows for command requests to go through.
             AddSnakeOrPowerup(nextLine);
             HandleServer();
         }
@@ -104,7 +111,9 @@ public class NetworkController
     /// <summary>
     ///   Requests that the server change the state of the client's snake. This method takes 
     ///   either LEFT, RIGHT, UP, DOWN, or NONE from the Direction enum. Based on the given 
-    ///   parameter, a request will be made to the server via this controller.
+    ///   parameter, a request will be made to the server via this controller. A request cannot 
+    ///   be made until the world has a player ID, wall, and a world size. If the world hasn't 
+    ///   been initialized with these things, the command will not be sent.
     /// </summary>
     /// <param name="direction"> 
     ///   This enables the GUI to send server requests via a direction enum. The specfic direction 
@@ -112,8 +121,11 @@ public class NetworkController
     /// </param>
     public void CommandRequest(Direction direction)
     {
-        string directionStringForm = direction.ToString().ToLower();
-        clientConnection.Send("{\"moving\":\"" + directionStringForm + "\"}");
+        if (worldInitialized)
+        {
+            string directionStringForm = direction.ToString().ToLower();
+            clientConnection.Send("{\"moving\":\"" + directionStringForm + "\"}");
+        }
     }
 
     /// <summary>
