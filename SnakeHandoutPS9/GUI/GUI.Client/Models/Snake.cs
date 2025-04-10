@@ -49,7 +49,7 @@ public class Snake
     {
         get
         {
-            return Body[Body.Count]; // Gets the last index in O(1) time.
+            return Body[Body.Count - 1]; // Gets the last index in O(1) time.
         }
     }
 

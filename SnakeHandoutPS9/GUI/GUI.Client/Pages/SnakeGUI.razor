@@ -30,15 +30,15 @@
 </div>
 
 
+<img @ref="backgroundImage" id="bgImage" src="images/Sand_Background.png" alt="image" style="display:none;" />
+
+<img @ref="wallImage" id="wallImage" src="images/Limestone Wall Tile Texture.png" alt="image" style="display:none;" />
 
 <div id="snakeCanvas" style="position: fixed; width: 100%; height: 100%">
     <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
 </div>
 
 
-<img @ref="backgroundImage" id="bgImage" src="image/Sand Background.png" alt="image" style="display:none;" />
-
-<img @ref="wallImage" id="bgImage" src="image/Limestone Wall Tile Texture.png" alt="image" style="display:none;" />
 
 @code
 {
@@ -100,11 +100,6 @@
 
             // TODO: Start the game loop
             GameLoop();
-
-            // in the meantime, draw something to initialize the canvas
-            // you may want to remove this after you are drawing something
-            await context.SetFillStyleAsync( "lightblue" );
-            await context.FillRectAsync( 0, 0, 1000, 1000 );
         }
     }
 
@@ -145,23 +140,32 @@
     /// </summary>
     /// <returns> Returns a Task object. TODO REMOVE? </returns>
     private async Task DrawFrame(){
-        // Batch is called here so that the early return doesn't prevent other operations from occuring.
-        await context.BeginBatchAsync();        
-        if (!world.Snakes.ContainsKey(world.PlayerID))
-        {
-            await context.EndBatchAsync();
-            return;
-        }
-
         // Copy the world so that it can be drawn without being interrupted.
         World worldCopy;
         lock (world)
             worldCopy = new(world);
 
+
+        await context.SetFillStyleAsync("lightblue");
+        await context.FillRectAsync(0, 0, 1000, 1000);
+        // Batch is called here so that the early return doesn't prevent other operations from occuring.
+             
+        if (!worldCopy.Snakes.ContainsKey(worldCopy.PlayerID))
+        {
+           // await context.EndBatchAsync();
+            return;
+        }
+        await context.BeginBatchAsync();
+
         // clip the view so that objects drawn outside the canvas will not be shown
         await context.BeginPathAsync();
+        // in the meantime, draw something to initialize the canvas
+        // you may want to remove this after you are drawing something
+
+
         await context.RectAsync(0, 0, ViewWidth, ViewHeight);
         await context.ClipAsync();
+
 
         // Because we are modifying the transformation matrix, we need to save it so we can restore it at the end
         await context.SaveAsync();
@@ -173,9 +177,12 @@
         await context.TranslateAsync(-player.Head.X, -player.Head.Y);
 
         // Draw the background:
-        await context.DrawImageAsync(backgroundImage, -world.Size / 2, -world.Size / 2, world.Size, world.Size);
+        await context.DrawImageAsync(backgroundImage, -worldCopy.Size / 2, -worldCopy.Size / 2, worldCopy.Size, worldCopy.Size);
+
+        await context.RestoreAsync();
 
         await context.EndBatchAsync();
+
 
         StateHasChanged();
     }

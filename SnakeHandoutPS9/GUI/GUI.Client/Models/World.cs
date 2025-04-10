@@ -62,6 +62,7 @@ namespace GUI.Client.Models;
     /// <param name="world"> world to be copied </param>
     public World(World world)
     {
+        PlayerID = world.PlayerID;
         Size = world.Size;
         Snakes = new(world.Snakes);
         Walls = new(world.Walls);
