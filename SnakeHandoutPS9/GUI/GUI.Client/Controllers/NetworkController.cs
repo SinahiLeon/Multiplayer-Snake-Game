@@ -109,6 +109,18 @@ public class NetworkController
     }
 
     /// <summary>
+    ///   Disconnects from the server and resets the world. Also prevents commands from being 
+    ///   sent since the server is not connected to.
+    /// </summary>
+    public void Disconnect()
+    {
+        worldInitialized = false;
+        clientConnection.Disconnect();
+        lock(world)
+            world.Clear();
+    }
+
+    /// <summary>
     ///   Requests that the server change the state of the client's snake. This method takes 
     ///   either LEFT, RIGHT, UP, DOWN, or NONE from the Direction enum. Based on the given 
     ///   parameter, a request will be made to the server via this controller. A request cannot 
