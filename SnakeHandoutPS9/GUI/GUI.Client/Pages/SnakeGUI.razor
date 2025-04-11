@@ -192,12 +192,34 @@
         }
     }
 
+
+    private async Task DrawSnakeSegment(Point2D point1, Point2D point2, string color, int width)
+    {
+        // Draw tail
+        await context.SetLineWidthAsync(width/2);
+        await context.SetStrokeStyleAsync(color);
+        await context.BeginPathAsync();
+        await context.ArcAsync(point1.X, point1.Y, width/4, 0, 2 * Math.PI);
+        await context.StrokeAsync();
+
+        await context.BeginPathAsync();
+        await context.ArcAsync(point2.X, point2.Y, width / 4, 0, 2 * Math.PI);
+        await context.StrokeAsync();
+
+        // Draw body in middle
+        await context.SetLineWidthAsync(width);
+        await context.BeginPathAsync();
+        await context.MoveToAsync(point1.X, point1.Y);
+        await context.LineToAsync(point2.X, point2.Y);
+        await context.StrokeAsync();
+    }
+
     /// <summary>
     ///  TODO
     /// </summary>
     /// <param name="snake"></param>
     /// <returns></returns>
-    private async Task DrawSnake(Snake snake)
+    private async Task DrawLivingSnake(Snake snake)
     {
         Point2D previousSegment = snake.Body[0];
 
@@ -207,7 +229,6 @@
 
             // Draw tail
             await context.SetLineWidthAsync(6);
-            // await context.SetStrokeStyleAsync($"rgb(0, 0, 240)");
             await context.SetStrokeStyleAsync(ColorChooser.ChooseColor(snake.ID));
             await context.BeginPathAsync();
             await context.ArcAsync(previousSegment.X, previousSegment.Y, 2, 0, 2 * Math.PI);
@@ -259,14 +280,26 @@
             previousSegment = currentSegment;
         }
 
-        // await context.SetLineWidthAsync(1);
         await context.SetFontAsync("bold 12pt monospace");
-        // await context.SetStrokeStyleAsync("white");
         await context.SetTextAlignAsync(TextAlign.Center);
         await context.SetFillStyleAsync("black");
         await context.FillTextAsync($"{snake.Name}:{snake.Score}", snake.Head.X, snake.Head.Y - 8);
-        // await context.StrokeTextAsync();
     }
+
+    /// <summary>
+    /// Method that defines how each powerup is drawn.
+    /// </summary>
+    /// <param name="powerup"> Powerup object being drawn </param>
+    /// <returns> Task object used for await purposes </returns>
+    private async Task DrawPowerup(Powerup powerup)
+    {
+        await context.SetLineWidthAsync(8);
+        await context.SetStrokeStyleAsync($"rgb(255, 0, 0)");
+        await context.BeginPathAsync();
+        await context.ArcAsync(powerup.Location.X, powerup.Location.Y, 4, 0, 2 * Math.PI);
+        await context.StrokeAsync();
+    }
+
 
     /// <summary>
     ///   Draws the current state of the game in the game display canvas.
@@ -315,16 +348,16 @@
         }
 
         foreach (Snake snake in worldCopy.Snakes.Values)
-            await DrawSnake(snake);
-
-        //<addition>
+        {
+            if (snake.Alive)
+                await DrawLivingSnake(snake);
+            else
+                await DrawDeadSnake(snake);
+            
+        }
+            
         foreach (Powerup powerup in worldCopy.Powerups.Values) {
-            // Powerup Circle
-            await context.SetLineWidthAsync(8);
-            await context.SetStrokeStyleAsync($"rgb(255, 0, 0)");
-            await context.BeginPathAsync();
-            await context.ArcAsync(powerup.Location.X, powerup.Location.Y, 4, 0, 2 * Math.PI);
-            await context.StrokeAsync();
+            await DrawPowerup(powerup); 
         }
 
         // Because we are modifying the transformation matrix, we need to restore it
