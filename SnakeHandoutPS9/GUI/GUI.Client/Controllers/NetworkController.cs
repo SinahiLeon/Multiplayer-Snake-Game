@@ -210,6 +210,13 @@ public class NetworkController
         }
     }
 
+    /// <summary>
+    ///   Attempts to add the deserialized JSON (snake or powerup) to the world. If this 
+    ///   fails, does nothing. Also removes when needed.
+    /// </summary>
+    /// <param name="json">
+    ///   JSON string representing either a powerup or snake object.
+    /// </param>
     private void UpdateSnakeOrPowerup(string json)
     {
         // If any parsing doesn't go right, don't throw an exception.
@@ -220,6 +227,7 @@ public class NetworkController
                 Snake? snake = JsonSerializer.Deserialize<Snake>(json);
                 if (snake != null)
                 {
+                    // Determine whether or not the snake has disconnected in this frame.
                     if (!snake.DidDisconnect)
                     {
                         lock (world)
