@@ -115,7 +115,7 @@ public class NetworkController
             }
 
             worldInitialized = true; // Allows for command requests to go through.
-            AddSnakeOrPowerup(nextLine);
+            UpdateSnakeOrPowerup(nextLine);
             HandleServer();
         }
         catch 
@@ -171,43 +171,6 @@ public class NetworkController
                 UpdateSnakeOrPowerup(json);
             }
         } catch { }
-    }
-    
-    /// <summary>
-    ///   Attempts to add the deserialized JSON to the world. Expects the JSON to either 
-    ///   be a powerup or a snake. If the given JSON is neither, the world will not be 
-    ///   updated.
-    /// </summary>
-    /// <param name="json">
-    ///   JSON string representing either a powerup or snake object.
-    /// </param>
-    private void AddSnakeOrPowerup(string json)
-    {
-        // Tries to deserialize the given json as a powerup. If that fails, tries to
-        // deserialize as a snake. If that fails, do nothing. In all cases where
-        // deserialization is successful, adds the new object to the world.
-        try
-        {
-            Powerup? powerup = JsonSerializer.Deserialize<Powerup>(json);
-            if (powerup != null)
-            {
-                lock(world)
-                    world.Powerups[powerup.ID] = powerup;
-            }
-        }
-        catch
-        {
-            try
-            {
-                Snake? snake = JsonSerializer.Deserialize<Snake>(json);
-                if (snake != null)
-                {
-                    lock(world)
-                        world.Snakes[snake.ID] = snake;
-                }
-            }
-            catch { }
-        }
     }
 
     /// <summary>
