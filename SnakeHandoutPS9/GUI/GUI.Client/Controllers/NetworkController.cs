@@ -139,7 +139,7 @@ public class NetworkController
             {
                 var json = clientConnection.ReadLine();
 
-                AddSnakeOrPowerup(json);
+                UpdateSnakeOrPowerup(json);
             }
         } catch { }
     }
@@ -179,5 +179,49 @@ public class NetworkController
             }
             catch { }
         }
+    }
+
+    private void UpdateSnakeOrPowerup(string json)
+    {
+        // If any parsing doesn't go right, don't throw an exception.
+        try
+        {
+            if (json.StartsWith("{\"snake"))
+            {
+                Snake? snake = JsonSerializer.Deserialize<Snake>(json);
+                if (snake != null)
+                {
+                    if (!snake.DidDisconnect)
+                    {
+                        lock (world)
+                            world.Snakes[snake.ID] = snake;
+                    }
+                    else
+                    {
+                        lock (world)
+                            world.Snakes.Remove(snake.ID);
+                    }
+                }
+            }
+            else
+            {
+                Powerup? powerup = JsonSerializer.Deserialize<Powerup>(json);
+                if (powerup != null)
+                {
+                    // Determine whether or not the powerup was collected in this frame.
+                    if (!powerup.IsCollected)
+                    {
+                        lock (world)
+                            world.Powerups[powerup.ID] = powerup;
+                    }
+                    else
+                    {
+                        lock(world)
+                            world.Powerups.Remove(powerup.ID);
+                    }
+                }
+            }
+        }
+        catch { }
     }
 }
