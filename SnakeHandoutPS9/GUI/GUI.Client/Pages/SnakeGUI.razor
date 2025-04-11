@@ -29,10 +29,11 @@
     }
 </div>
 
-
 <img @ref="backgroundImage" id="bgImage" src="images/Sand_Background.png" alt="image" style="display:none;" />
 
 <img @ref="wallImage" id="wallImage" src="images/WallSprite.png" alt="image" style="display:none;" />
+
+<img @ref="powerupImage" id="powerImage" src="images/Desert Mouse Powerup.png" alt="image" style="display:none;" />
 
 <div id="snakeCanvas" style="position: fixed; width: 100%; height: 100%">
     <BECanvas Width="1000" Height="1000" @ref="canvasReference"></BECanvas>
@@ -73,6 +74,11 @@
     private const int WallWidth = 50;
 
     /// <summary>
+    /// Constant width of each powerup image
+    /// </summary>
+    private const int PowerupWidth = 16;
+
+    /// <summary>
     ///   Total thickness of the snake to be drawn.
     /// </summary>
     private const int SnakeTotalThickness = 10;
@@ -92,16 +98,15 @@
     /// </summary>
     private World world = new();
 
-    private Queue<string> commandQueue = new(); // TODO REMOVE IF NECESSARY
-
-    private bool commandSentThisFrame = false; // TODO REMOVE IF NEEDED.
-
     /// <summary>
     /// Controller object that receives information from the 
     /// server and updates the model. The GUI can send 
-    /// requests to this controller to update the game state.
+    /// requests to this controller to update the game state. 
+    /// Initializes an empty world here so no exception 
+    /// occurs when drawing when a client hasn't connected for
+    /// the first time.
     /// </summary>
-    private NetworkController controller = new(new()); // TODO COME UP WITH PERMANENT SOLUTION.
+    private NetworkController controller = new(new());
 
     private BECanvasComponent canvasReference = null!;
     private Canvas2DContext context = null!;
@@ -109,6 +114,7 @@
 
     private ElementReference backgroundImage;
     private ElementReference wallImage;
+    private ElementReference powerupImage;
 
     /// <summary>
     ///   Starts the client when this page is opened.
@@ -122,6 +128,7 @@
             jsModule = await JsRuntime.InvokeAsync<IJSObjectReference>( "import", "./Pages/SnakeGUI.razor.js" );
             context = await canvasReference.CreateCanvas2DAsync();
             await JsRuntime.InvokeAsync<object>( "initRenderJS", DotNetObjectReference.Create( this ) );
+            
             controller = new(world);
 
             GameLoop();
@@ -129,14 +136,12 @@
     }
 
     /// <summary>
-    ///   TODO
+    ///   Sends a command request to the Controller based on the keyboard input.
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="key"> The key that the user presses. </param>
     [JSInvokable]
     public void HandleKeyPress( string key )
     {
-        // commandQueue.Enqueue(key); TODO
-
         switch (key)
         {
             case "w": controller.CommandRequest(Direction.UP); break;
@@ -157,7 +162,6 @@
             Thread.Sleep(20);
             await DrawFrame();
         }
-
     }
 
     /// <summary>
@@ -260,6 +264,7 @@
     {
         Point2D previousSegment = snake.Body[0];
 
+        // Draw outline color.
         for (int index = 1; index < snake.Body.Count; index++)
         {
             Point2D currentSegment = snake.Body[index];
@@ -271,6 +276,7 @@
 
         previousSegment = snake.Body[0];
 
+        // Draw interior color.
         for (int index = 1; index < snake.Body.Count; index++)
         {
             Point2D currentSegment = snake.Body[index];
@@ -280,6 +286,7 @@
             previousSegment = currentSegment;
         }
 
+        // Draw snake name and score.
         await context.SetFontAsync("bold 12pt monospace");
         await context.SetTextAlignAsync(TextAlign.Center);
         await context.SetFillStyleAsync("black");
@@ -313,37 +320,41 @@
     /// <returns> Task object used for await purposes </returns>
     private async Task DrawPowerup(Powerup powerup)
     {
-        await context.SetLineWidthAsync(8);
-        await context.SetStrokeStyleAsync($"rgb(255, 0, 0)");
-        await context.BeginPathAsync();
-        await context.ArcAsync(powerup.Location.X, powerup.Location.Y, 4, 0, 2 * Math.PI);
-        await context.StrokeAsync();
+        await context.DrawImageAsync(powerupImage, powerup.Location.X - PowerupWidth / 2, powerup.Location.Y - PowerupWidth / 2, PowerupWidth, PowerupWidth);
     }
 
 
     /// <summary>
     ///   Draws the current state of the game in the game display canvas.
     /// </summary>
-    /// <returns> Returns a Task object. TODO REMOVE? </returns>
+    /// <returns> Returns a Task object used for await purposes. </returns>
     private async Task DrawFrame(){
         // Copy the world so that it can be drawn without being interrupted.
         World worldCopy;
         lock (world)
             worldCopy = new(world);
 
-
-
         // Batch is called here so that the early return doesn't prevent other operations from occuring.
         await context.BeginBatchAsync();
 
+        // Draw "Ready to Connect" if connection failure hasn't ocurred, otherwise draw "FAILED TO 
+        // CONNECT TO SERVER." Also prevents canvas from being rendered when not connected.
         if (!worldCopy.Snakes.ContainsKey(worldCopy.PlayerID))
         {
+            await context.ClearRectAsync(0, 0, ViewWidth, ViewHeight);
             if (controller.FailedToConnect)
             {
                 await context.SetFontAsync("bold 30pt Times New Roman");
                 await context.SetFillStyleAsync("red");
                 await context.SetTextAlignAsync(TextAlign.Center);
                 await context.FillTextAsync("FAILED TO CONNECT TO SERVER", ViewWidth / 2, ViewWidth / 2);
+            }
+            else 
+            {
+                await context.SetFontAsync("bold 30pt Times New Roman");
+                await context.SetFillStyleAsync("black");
+                await context.SetTextAlignAsync(TextAlign.Center);
+                await context.FillTextAsync("Ready to Connect", ViewWidth / 2, ViewWidth / 2);
             }
             await context.EndBatchAsync();
             return;
@@ -375,6 +386,11 @@
             await DrawWall(wall);
         }
 
+        // Draw powerups.
+        foreach (Powerup powerup in worldCopy.Powerups.Values) {
+            await DrawPowerup(powerup); 
+        }
+
         // Draw snakes.
         foreach (Snake snake in worldCopy.Snakes.Values)
         {
@@ -382,12 +398,7 @@
                 await DrawLivingSnake(snake);
             else
                 await DrawDeadSnake(snake);
-        }
-        
-        // Draw powerups.
-        foreach (Powerup powerup in worldCopy.Powerups.Values) {
-            await DrawPowerup(powerup); 
-        }
+        } 
 
         // Because we are modifying the transformation matrix, we need to restore it
         await context.RestoreAsync();
