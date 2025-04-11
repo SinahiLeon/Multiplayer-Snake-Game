@@ -41,6 +41,11 @@ public class NetworkController
     private bool worldInitialized;
 
     /// <summary>
+    /// Boolean that tells the server if the controller failed to connect. 
+    /// </summary>
+    public bool FailedToConnect { get; private set; }
+
+    /// <summary>
     /// Returns whether the client is connected or not.
     /// </summary>
     public bool IsConnected { 
@@ -70,6 +75,14 @@ public class NetworkController
     {
         try
         {
+            FailedToConnect = false;
+
+            string playerNamedTrimmed = playerName.Trim();
+            if (playerNamedTrimmed.Length > 16)
+                playerName = playerNamedTrimmed.Substring(0, 13) + "...";
+            else 
+                playerName = playerNamedTrimmed;
+
             clientConnection.Connect(host, port);
             clientConnection.Send(playerName.Trim());
 
@@ -105,7 +118,11 @@ public class NetworkController
             AddSnakeOrPowerup(nextLine);
             HandleServer();
         }
-        catch { }
+        catch 
+        {
+            FailedToConnect = true;
+            Disconnect();
+        }
     }
 
     /// <summary>

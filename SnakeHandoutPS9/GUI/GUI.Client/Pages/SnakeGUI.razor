@@ -338,6 +338,13 @@
 
         if (!worldCopy.Snakes.ContainsKey(worldCopy.PlayerID))
         {
+            if (controller.FailedToConnect)
+            {
+                await context.SetFontAsync("bold 30pt Times New Roman");
+                await context.SetFillStyleAsync("red");
+                await context.SetTextAlignAsync(TextAlign.Center);
+                await context.FillTextAsync("FAILED TO CONNECT TO SERVER", ViewWidth / 2, ViewWidth / 2);
+            }
             await context.EndBatchAsync();
             return;
         }

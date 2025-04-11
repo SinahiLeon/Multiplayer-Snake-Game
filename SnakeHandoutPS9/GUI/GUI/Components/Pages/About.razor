@@ -1,7 +1,24 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+<PageTitle> Snake </PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Welcome to Mason and Sinahi's Snake Game</h1>
 
-Welcome to your new app.
+<p>
+    This is a multiplayer online game built using Blazor and the network. It communicates with a game server to receive and display the state of the game world, including all snakes, walls, and powerups.
+</p>
+
+<h2>Design Decisions</h2>
+<ul>
+    <li><strong>Color Coding:</strong> Each snake is assigned a base color and an outline color that is based on their PlayerID </li>
+
+</ul>
+
+<h2>Features Implemented</h2>
+<ul>
+    <li>Connect to a server by entering name, address, and port.</li>
+    <li>Responsive to keyboard input (WASD only) to control snake direction.</li>
+    <li>Disconnect button to manually exit the game server</li>
+</ul>
+
+<p><em>Thanks for playing!</em></p>
