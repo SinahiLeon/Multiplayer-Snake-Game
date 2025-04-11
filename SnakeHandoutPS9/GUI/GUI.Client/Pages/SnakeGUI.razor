@@ -21,7 +21,7 @@
     <input id="port" disabled="@controller.IsConnected" type="number" @bind="ServerPort" class="port" />
     @if (controller.IsConnected)
     {
-        @* <button class="btn btn-primary" @onclick="DisconnectFromServer">Disconnect</button> *@
+        <button class="btn btn-primary" @onclick="() => controller.Disconnect()">Disconnect</button>
     }
     else
     {
@@ -73,13 +73,28 @@
     private const int WallWidth = 50;
 
     /// <summary>
+    ///   Total thickness of the snake to be drawn.
+    /// </summary>
+    private const int SnakeTotalThickness = 10;
+
+    /// <summary>
+    ///   The thickness of the snake stripe to be drawn.
+    /// </summary>
+    private const int SnakeStripeThickness = 6;
+
+    /// <summary>
+    ///   The color used to draw a dead snake.
+    /// </summary>
+    private const string SnakeDeadColor = $"rgb(0, 0, 0)";
+
+    /// <summary>
     /// World object our player is in.
     /// </summary>
     private World world = new();
 
-    private Queue<string> commandQueue = new();
+    private Queue<string> commandQueue = new(); // TODO REMOVE IF NECESSARY
 
-    private bool commandSentThisFrame = false;
+    private bool commandSentThisFrame = false; // TODO REMOVE IF NEEDED.
 
     /// <summary>
     /// Controller object that receives information from the 
@@ -95,9 +110,11 @@
     private ElementReference backgroundImage;
     private ElementReference wallImage;
 
-
-
-
+    /// <summary>
+    ///   Starts the client when this page is opened.
+    /// </summary>
+    /// <param name="firstRender"> Determines if this is the first render. </param>
+    /// <returns> A task object for await purposes. </returns>
     protected override async Task OnAfterRenderAsync( bool firstRender )
     {
         if ( firstRender )
@@ -111,11 +128,14 @@
         }
     }
 
-
+    /// <summary>
+    ///   TODO
+    /// </summary>
+    /// <param name="key"></param>
     [JSInvokable]
     public void HandleKeyPress( string key )
     {
-        // commandQueue.Enqueue(key);
+        // commandQueue.Enqueue(key); TODO
 
         switch (key)
         {
@@ -125,9 +145,6 @@
             case "d": controller.CommandRequest(Direction.RIGHT); break;
             default: controller.CommandRequest(Direction.NONE); break;
         }
-
-        // TODO: Remove this, which is just here to show you what the 'key' string is for whatever key you pressed
-        Debug.WriteLine("key pressed: " + key);
     }
 
     /// <summary>
@@ -192,21 +209,38 @@
         }
     }
 
-
+    /// <summary>
+    ///   Draws one segment of a snake at the given destination, color, and width
+    ///   based on the given parameters in the shape of a capsule.
+    /// </summary>
+    /// <param name="point1">
+    ///   First end (center point) of the snake segment to be drawn.
+    /// </param>
+    /// <param name="point2"> 
+    ///   Second end (center point) of the snake segment to be drawn. 
+    /// </param>
+    /// <param name="color">
+    ///   Gives a color in string rgb form that can be used to color this segment. 
+    ///   Must be a valid HTML color either in word form or in rgb form. 
+    ///   E.g: for rgb input "$rgb(100, 100, 100)"
+    /// </param>
+    /// <param name="width"> Width of the segment to be drawn. </param>
+    /// <returns> A task object used for await purposes. </returns>
     private async Task DrawSnakeSegment(Point2D point1, Point2D point2, string color, int width)
     {
-        // Draw tail
+        // Point 1 circle:
         await context.SetLineWidthAsync(width/2);
         await context.SetStrokeStyleAsync(color);
         await context.BeginPathAsync();
         await context.ArcAsync(point1.X, point1.Y, width/4, 0, 2 * Math.PI);
         await context.StrokeAsync();
 
+        // Point 2 circle:
         await context.BeginPathAsync();
         await context.ArcAsync(point2.X, point2.Y, width / 4, 0, 2 * Math.PI);
         await context.StrokeAsync();
 
-        // Draw body in middle
+        // Draw a line connecting point 1 and point 2:
         await context.SetLineWidthAsync(width);
         await context.BeginPathAsync();
         await context.MoveToAsync(point1.X, point1.Y);
@@ -215,10 +249,13 @@
     }
 
     /// <summary>
-    ///  TODO
+    ///   Draws a living snake object with a primary color and secondary color chosen 
+    ///   by ColorChooser. The primary color is the remainder of the ID and 8 and 
+    ///   the secondary color is the remainder of the ID - 1 and 8 according to 
+    ///   how color chooser chooses colors.
     /// </summary>
-    /// <param name="snake"></param>
-    /// <returns></returns>
+    /// <param name="snake"> The snake to be drawn. </param>
+    /// <returns> A task object used for await purposes. </returns>
     private async Task DrawLivingSnake(Snake snake)
     {
         Point2D previousSegment = snake.Body[0];
@@ -227,25 +264,7 @@
         {
             Point2D currentSegment = snake.Body[index];
 
-            // Draw tail
-            await context.SetLineWidthAsync(6);
-            await context.SetStrokeStyleAsync(ColorChooser.ChooseColor(snake.ID));
-            await context.BeginPathAsync();
-            await context.ArcAsync(previousSegment.X, previousSegment.Y, 2, 0, 2 * Math.PI);
-            await context.StrokeAsync();
-
-            // Draw body in middle
-            await context.SetLineWidthAsync(10);
-            await context.BeginPathAsync();
-            await context.MoveToAsync(previousSegment.X, previousSegment.Y);
-            await context.LineToAsync(currentSegment.X, currentSegment.Y);
-            await context.StrokeAsync();
-
-            // Draw head
-            await context.SetLineWidthAsync(6);
-            await context.BeginPathAsync();
-            await context.ArcAsync(currentSegment.X, currentSegment.Y, 2, 0, 2 * Math.PI);
-            await context.StrokeAsync();
+            await DrawSnakeSegment(currentSegment, previousSegment, ColorChooser.ChooseColor(snake.ID), SnakeTotalThickness);
 
             previousSegment = currentSegment;
         }
@@ -256,26 +275,7 @@
         {
             Point2D currentSegment = snake.Body[index];
 
-            // Draw tail
-            await context.SetLineWidthAsync(4);
-            await context.SetStrokeStyleAsync($"rgb(0, 0, 240)");
-            await context.SetStrokeStyleAsync(ColorChooser.ChooseColor(snake.ID - 1));
-            await context.BeginPathAsync();
-            await context.ArcAsync(previousSegment.X, previousSegment.Y, 1, 0, 2 * Math.PI);
-            await context.StrokeAsync();
-
-            // Draw body in middle
-            await context.SetLineWidthAsync(6);
-            await context.BeginPathAsync();
-            await context.MoveToAsync(previousSegment.X, previousSegment.Y);
-            await context.LineToAsync(currentSegment.X, currentSegment.Y);
-            await context.StrokeAsync();
-
-            // Draw head
-            await context.SetLineWidthAsync(4);
-            await context.BeginPathAsync();
-            await context.ArcAsync(currentSegment.X, currentSegment.Y, 1, 0, 2 * Math.PI);
-            await context.StrokeAsync();
+            await DrawSnakeSegment(currentSegment, previousSegment, ColorChooser.ChooseColor(snake.ID - 1), SnakeStripeThickness);
 
             previousSegment = currentSegment;
         }
@@ -284,6 +284,26 @@
         await context.SetTextAlignAsync(TextAlign.Center);
         await context.SetFillStyleAsync("black");
         await context.FillTextAsync($"{snake.Name}:{snake.Score}", snake.Head.X, snake.Head.Y - 8);
+    }
+
+    /// <summary>
+    ///   Draws a dead snake object with a single color defined by the SnakeDeadColor 
+    ///   constant variable.
+    /// </summary>
+    /// <param name="snake"> The snake to be drawn. </param>
+    /// <returns> A task object used for await purposes. </returns>
+    private async Task DrawDeadSnake(Snake snake)
+    {
+        Point2D previousSegment = snake.Body[0];
+
+        for (int index = 1; index < snake.Body.Count; index++)
+        {
+            Point2D currentSegment = snake.Body[index];
+
+            await DrawSnakeSegment(currentSegment, previousSegment, SnakeDeadColor, SnakeTotalThickness);
+
+            previousSegment = currentSegment;
+        }
     }
 
     /// <summary>
@@ -343,19 +363,21 @@
         // Draw the background:
         await context.DrawImageAsync(backgroundImage, -worldCopy.Size / 2, -worldCopy.Size / 2, worldCopy.Size, worldCopy.Size);
 
+        // Draw walls.
         foreach(Wall wall in worldCopy.Walls.Values){
             await DrawWall(wall);
         }
 
+        // Draw snakes.
         foreach (Snake snake in worldCopy.Snakes.Values)
         {
             if (snake.Alive)
                 await DrawLivingSnake(snake);
             else
                 await DrawDeadSnake(snake);
-            
         }
-            
+        
+        // Draw powerups.
         foreach (Powerup powerup in worldCopy.Powerups.Values) {
             await DrawPowerup(powerup); 
         }
