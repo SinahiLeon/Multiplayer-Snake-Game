@@ -46,7 +46,21 @@ namespace GUI.Client.Models;
     public Dictionary<int, Powerup> Powerups { get; private set; }
 
     /// <summary>
-    /// Creates a new empty world ready to be initialized by the controller.
+    /// Removes entities from the world and returns the world to the state it is in when 
+    /// first constructed.
+    /// </summary>
+    public void Clear()
+    {
+        Snakes = new Dictionary<int, Snake>();
+        Walls = new Dictionary<int, Wall>();
+        Powerups = new Dictionary<int, Powerup>();
+        PlayerID = 0;
+        Size = 0;
+    }
+
+    /// <summary>
+    /// Creates a new empty world ready to be initialized by the controller witha player 
+    /// ID of 0 and a world size of 0.
     /// </summary>
     public World()
     {
