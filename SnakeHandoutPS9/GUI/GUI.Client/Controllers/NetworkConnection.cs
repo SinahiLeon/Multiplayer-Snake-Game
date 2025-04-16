@@ -50,8 +50,8 @@ public sealed class NetworkConnection : IDisposable
         if (IsConnected)
         {
             // Only establish the reader/writer if the provided TcpClient is already connected.
-            _reader = new StreamReader(_tcpClient.GetStream(), Encoding.UTF8);
-            _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true }; // AutoFlush ensures data is sent immediately
+            _reader = new StreamReader(_tcpClient.GetStream(), new UTF8Encoding(false));
+            _writer = new StreamWriter(_tcpClient.GetStream(), new UTF8Encoding(false)) { AutoFlush = true }; // AutoFlush ensures data is sent immediately
         }
     }
 
@@ -87,8 +87,8 @@ public sealed class NetworkConnection : IDisposable
         try
         {
             _tcpClient = new TcpClient(host, port);
-            _reader = new StreamReader(_tcpClient.GetStream(), Encoding.UTF8);
-            _writer = new StreamWriter(_tcpClient.GetStream(), Encoding.UTF8) { AutoFlush = true };
+            _reader = new StreamReader(_tcpClient.GetStream(), new UTF8Encoding(false));
+            _writer = new StreamWriter(_tcpClient.GetStream(), new UTF8Encoding(false)) { AutoFlush = true };
         }
         catch { }
     }
