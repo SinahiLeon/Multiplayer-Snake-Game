@@ -21,6 +21,7 @@
   <ItemGroup>
     <PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.10" />
+    <PackageReference Include="MySql.Data" Version="9.3.0" />
 
   </ItemGroup>
 
