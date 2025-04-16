@@ -15,4 +15,37 @@ namespace GUI.Client.Controllers;
 /// </summary>
 public class DatabaseManager
 {
+
+    /// <summary>
+    /// The connection string for connecting to our database.
+    /// </summary>
+    public const string connectionString = "server=atr.eng.utah.edu;" +
+        "database=u1312051;uid=u1312051;password=Sinahi123";
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <returns></returns>
+    private MySQLConnection SendCommand(string text)
+    {
+        using (MySqlConnection connection = new MySqlConnection(connectionString))
+        {
+            connection.Open();
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = text;
+            MySqlDataReader reader = command.ExecuteReader(); 
+
+        }
+
+    }
+
+
+    //TODO: 
+    // add new game to table
+    // add new player to table
+    // update player in table
+    // update game in table
+
 }
+
+
