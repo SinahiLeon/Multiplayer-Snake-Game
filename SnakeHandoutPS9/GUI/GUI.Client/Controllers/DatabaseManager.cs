@@ -9,6 +9,7 @@
 using System.Data;
 using MySql.Data.MySqlClient;
 using static System.Net.Mime.MediaTypeNames;
+using GUI.Client.Models;
 
 namespace GUI.Client.Controllers;
 
@@ -66,9 +67,28 @@ public class DatabaseManager
         }
     }
 
+    /// <summary>
+    ///  Adds a new Snake player to the MSQL table with the parameters of GameID and 
+    ///  playerID and with those it also initializes the player object with a name
+    ///  and start time. 
+    /// </summary>
+    /// <param name="gameID"> ID of the game we are adding a player to. </param>
+    /// <param name="player"> User being added to the game. </param>
+    public static void AddPlayer(int gameID, Snake player)
+    {
+        string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
+
+        SendCommand($"insert into Players (GameID, PlayerID, Name, Start) values ({gameID}, {player.ID}, \"{player.Name}\", \"{currentTime}\")");
+    }
+
+
+    public static void UpdateMaxScore(int gameID, Snake player)
+    {
+        SendCommand($"update Players set MaxScore = {player.MaxScore} where GameID = {gameID} and PlayerID = {player} ");
+    }
+
+
     //TODO: 
-    // add new game to table
-    // add new player to table
     // update player in table
     // update game in table
 
