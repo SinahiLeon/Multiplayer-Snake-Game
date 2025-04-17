@@ -54,7 +54,7 @@ public class DatabaseManager
     {
         string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
 
-        SendCommand($"insert into Games (Start) values ({"\"" + currentTime + "\""})");
+        SendCommand($"insert into Games (Start) values (\"{currentTime}\")");
 
         using (MySqlConnection connection = new MySqlConnection(connectionString))
         {
