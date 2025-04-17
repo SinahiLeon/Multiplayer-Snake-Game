@@ -26,6 +26,12 @@ public class Snake
     public int ID { get; private set; }
 
     /// <summary>
+    ///   Property storing the maximum score obtained by this snake.
+    /// </summary>
+    [JsonIgnore]
+    public int MaxScore { get; set; }
+
+    /// <summary>
     /// Property storing the snake name
     /// </summary>
     [JsonPropertyName("name")]
