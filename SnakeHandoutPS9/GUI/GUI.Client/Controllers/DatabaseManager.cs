@@ -55,7 +55,7 @@ public class DatabaseManager
     {
         string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
 
-        SendCommand($"insert into Games (Start) values (\"{currentTime}\")");
+        SendCommand($"insert into Games (StartTime) values (\"{currentTime}\")");
 
         using (MySqlConnection connection = new MySqlConnection(connectionString))
         {
@@ -65,6 +65,19 @@ public class DatabaseManager
             MySqlDataReader reader = command.ExecuteReader();
             return (int)reader["GameID"];
         }
+    }
+
+    /// <summary>
+    ///   Sets the end time of the game in the database to be when this method is called.
+    /// </summary>
+    /// <param name="gameID">
+    ///   ID of the game to have its end time updated. 
+    /// </param>
+    public static void SetGameEndTime(int gameID)
+    {
+        string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
+
+        SendCommand($"update Games set EndTime = {currentTime} where GameID = {gameID}");
     }
 
     /// <summary>
@@ -78,20 +91,39 @@ public class DatabaseManager
     {
         string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
 
-        SendCommand($"insert into Players (GameID, PlayerID, Name, Start) values ({gameID}, {player.ID}, \"{player.Name}\", \"{currentTime}\")");
+        SendCommand($"insert into Players (GameID, PlayerID, Name, StartTime) values ({gameID}, {player.ID}, \"{player.Name}\", \"{currentTime}\")");
     }
 
-
+    /// <summary>
+    ///   Updates the maximum score of this snake/player of the game given in the 
+    ///   database with the score contained within the snake model given.
+    /// </summary>
+    /// <param name="gameID">
+    ///   ID of the game for which the player max score to be updated belongs to. 
+    /// </param>
+    /// <param name="player">
+    ///   The player as a snake to have its max score updated.
+    /// </param>
     public static void UpdateMaxScore(int gameID, Snake player)
     {
-        SendCommand($"update Players set MaxScore = {player.MaxScore} where GameID = {gameID} and PlayerID = {player} ");
+        SendCommand($"update Players set MaxScore = {player.MaxScore} where GameID = {gameID} and PlayerID = {player.ID}");
     }
 
+    /// <summary>
+    ///   Sets the end time of the player in the database to be when this method is called.
+    /// </summary>
+    /// <param name="gameID">
+    ///   ID of the game for which the player end time to be updated belongs to. 
+    /// </param>
+    /// <param name="player">
+    ///   The player as a snake to have its end time updated.
+    /// </param>
+    public static void SetPlayerEndTime(int gameID, Snake player)
+    {
+        string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
 
-    //TODO: 
-    // update player in table
-    // update game in table
-
+        SendCommand($"update Players set EndTime = {currentTime} where GameID = {gameID} and PlayerID = {player.ID}");
+    }
 }
 
 
