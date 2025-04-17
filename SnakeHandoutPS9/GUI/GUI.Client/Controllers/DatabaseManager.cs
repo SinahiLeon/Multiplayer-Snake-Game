@@ -6,7 +6,9 @@
 // <author> D. Mason Hair and Sinahi Leon </author>
 // <data> 4/16/2025 </date>
 
+using System.Data;
 using MySql.Data.MySqlClient;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GUI.Client.Controllers;
 
@@ -21,14 +23,14 @@ public class DatabaseManager
     /// <summary>
     /// The connection string for connecting to our database.
     /// </summary>
-    public const string connectionString = "server=atr.eng.utah.edu;" +
+    private const string connectionString = "server=atr.eng.utah.edu;" +
         "database=u1312051;uid=u1312051;password=Sinahi123";
 
     /// <summary>
     ///   Private method used for sending SQL queries.
     /// </summary>
     /// <param name="text"> The command in string form to be sent. </param>
-    private void SendCommand(string text)
+    private static void SendCommand(string text)
     {
         try
         {
@@ -43,6 +45,26 @@ public class DatabaseManager
         catch { }
     }
 
+    /// <summary>
+    ///   Adds a new game entity to the MySQL table with the start time that this 
+    ///   method was called in the database and returns the GameID of that object.
+    /// </summary>
+    /// <returns> Returns the GameID for the new game created. </returns>
+    public static int AddGame()
+    {
+        string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
+
+        SendCommand($"insert into Games (Start) values ({"\"" + currentTime + "\""})");
+
+        using (MySqlConnection connection = new MySqlConnection(connectionString))
+        {
+            connection.Open();
+            MySqlCommand command = connection.CreateCommand();
+            command.CommandText = "select insert_last_id()";
+            MySqlDataReader reader = command.ExecuteReader();
+            return (int)reader["GameID"];
+        }
+    }
 
     //TODO: 
     // add new game to table
