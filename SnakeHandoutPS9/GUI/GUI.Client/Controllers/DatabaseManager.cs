@@ -61,9 +61,11 @@ public class DatabaseManager
         {
             connection.Open();
             MySqlCommand command = connection.CreateCommand();
-            command.CommandText = "select insert_last_id()";
-            MySqlDataReader reader = command.ExecuteReader();
-            return (int)reader["GameID"];
+            command.CommandText = "select last_insert_id()";
+            using (MySqlDataReader reader = command.ExecuteReader())
+            {
+                return (int)reader["GameID"];
+            }
         }
     }
 

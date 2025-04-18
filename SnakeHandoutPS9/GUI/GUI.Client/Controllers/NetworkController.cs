@@ -46,6 +46,11 @@ public class NetworkController
     public bool FailedToConnect { get; private set; }
 
     /// <summary>
+    /// Int that stores the ID of the current game being played.
+    /// </summary>
+    private int gameID;
+
+    /// <summary>
     /// Returns whether the client is connected or not.
     /// </summary>
     public bool IsConnected { 
@@ -66,7 +71,8 @@ public class NetworkController
     }
 
     /// <summary>
-    ///   Try to connect to the given host:port. 
+    ///  This method connects to the given host:port to initialize the model and update 
+    ///  the database with a new game.
     /// </summary>
     /// <param name="host"> The URL or IP address, e.g., www.cs.utah.edu, or  127.0.0.1. </param>
     /// <param name="port"> The port, e.g., 11000. </param>
@@ -115,6 +121,7 @@ public class NetworkController
             }
 
             worldInitialized = true; // Allows for command requests to go through.
+            gameID = DatabaseManager.AddGame();
             UpdateSnakeOrPowerup(nextLine);
             HandleServer();
         }
@@ -127,10 +134,16 @@ public class NetworkController
 
     /// <summary>
     ///   Disconnects from the server and resets the world. Also prevents commands from being 
-    ///   sent since the server is not connected to.
+    ///   sent since the server is not connected to. When we disconnect, the game end time 
+    ///   is updated in the database and each player end time is updated as well.
     /// </summary>
     public void Disconnect()
     {
+        DatabaseManager.SetGameEndTime(gameID);
+        foreach(Snake snake in world.Snakes.Values)
+        {
+            DatabaseManager.SetPlayerEndTime(gameID, snake);
+        }
         worldInitialized = false;
         clientConnection.Disconnect();
         lock(world)
