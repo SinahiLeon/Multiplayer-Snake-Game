@@ -188,7 +188,8 @@ public class NetworkController
 
     /// <summary>
     ///   Attempts to add the deserialized JSON (snake or powerup) to the world. If this 
-    ///   fails, does nothing. Also removes when needed.
+    ///   fails, does nothing. Also removes when needed. This method also updates the 
+    ///   database to reflect changes to the model.
     /// </summary>
     /// <param name="json">
     ///   JSON string representing either a powerup or snake object.
@@ -200,19 +201,38 @@ public class NetworkController
         {
             if (json.StartsWith("{\"snake"))
             {
-                Snake? snake = JsonSerializer.Deserialize<Snake>(json);
-                if (snake != null)
+                Snake? newSnake = JsonSerializer.Deserialize<Snake>(json);
+                if (newSnake != null)
                 {
                     // Determine whether or not the snake has disconnected in this frame.
-                    if (!snake.DidDisconnect)
+                    if (!newSnake.DidDisconnect)
                     {
+                        // Update the database to include the new snake if this is a new snake.
+                        if (!world.Snakes.ContainsKey(newSnake.ID))
+                            DatabaseManager.AddPlayer(gameID, newSnake);
+                        else
+                        {
+                            Snake oldSnake = world.Snakes[newSnake.ID];
+
+                            // Update max score.
+                            if (oldSnake.MaxScore < newSnake.Score)
+                            {
+                                oldSnake.MaxScore = newSnake.Score;
+                                DatabaseManager.UpdateMaxScore(gameID, oldSnake);
+                            }
+                        }
+
                         lock (world)
-                            world.Snakes[snake.ID] = snake;
+                            world.Snakes[newSnake.ID] = newSnake;
                     }
                     else
                     {
+                        // Update snake player end time.
+                        DatabaseManager.SetPlayerEndTime(gameID, newSnake);
+                        
+                        // Update model by removing.
                         lock (world)
-                            world.Snakes.Remove(snake.ID);
+                            world.Snakes.Remove(newSnake.ID);
                     }
                 }
             }
