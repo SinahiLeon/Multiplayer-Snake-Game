@@ -84,8 +84,8 @@ public class DatabaseManager
 
     /// <summary>
     ///  Adds a new Snake player to the MSQL table with the parameters of GameID and 
-    ///  playerID and with those it also initializes the player object with a name
-    ///  and start time. 
+    ///  playerID and with those it also initializes the player object with a name,
+    ///  start time, and default score of 0.
     /// </summary>
     /// <param name="gameID"> ID of the game we are adding a player to. </param>
     /// <param name="player"> User being added to the game. </param>
@@ -93,12 +93,12 @@ public class DatabaseManager
     {
         string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
 
-        SendCommand($"insert into Players (GameID, PlayerID, Name, StartTime) values ({gameID}, {player.ID}, \"{player.Name}\", \"{currentTime}\")");
+        SendCommand($"insert into Players (GameID, PlayerID, Name, MaxScore, StartTime) values ({gameID}, {player.ID}, \"{player.Name}\", 0, \"{currentTime}\")");
     }
 
     /// <summary>
     ///   Updates the maximum score of this snake/player of the game given in the 
-    ///   database with the score contained within the snake model given.
+    ///   database with the MAX score contained within the snake model given.
     /// </summary>
     /// <param name="gameID">
     ///   ID of the game for which the player max score to be updated belongs to. 
