@@ -48,7 +48,7 @@ public class NetworkController
     /// <summary>
     /// Int that stores the ID of the current game being played.
     /// </summary>
-    private int gameID;
+    private UInt64 gameID;
 
     /// <summary>
     /// Returns whether the client is connected or not.
