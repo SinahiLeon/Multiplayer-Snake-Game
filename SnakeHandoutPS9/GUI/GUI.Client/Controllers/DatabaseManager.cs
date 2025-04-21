@@ -51,7 +51,7 @@ public class DatabaseManager
     ///   method was called in the database and returns the GameID of that object.
     /// </summary>
     /// <returns> Returns the GameID for the new game created. </returns>
-    public static int AddGame()
+    public static UInt64 AddGame()
     {
         string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
 
@@ -64,7 +64,8 @@ public class DatabaseManager
             command.CommandText = "select last_insert_id()";
             using (MySqlDataReader reader = command.ExecuteReader())
             {
-                return (int)reader["GameID"];
+                reader.Read();
+                return (UInt64)reader[0];
             }
         }
     }
@@ -75,11 +76,11 @@ public class DatabaseManager
     /// <param name="gameID">
     ///   ID of the game to have its end time updated. 
     /// </param>
-    public static void SetGameEndTime(int gameID)
+    public static void SetGameEndTime(UInt64 gameID)
     {
         string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
 
-        SendCommand($"update Games set EndTime = {currentTime} where GameID = {gameID}");
+        SendCommand($"update Games set EndTime = \"{currentTime}\" where GameID = {gameID}");
     }
 
     /// <summary>
@@ -89,7 +90,7 @@ public class DatabaseManager
     /// </summary>
     /// <param name="gameID"> ID of the game we are adding a player to. </param>
     /// <param name="player"> User being added to the game. </param>
-    public static void AddPlayer(int gameID, Snake player)
+    public static void AddPlayer(UInt64 gameID, Snake player)
     {
         string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
 
@@ -106,7 +107,7 @@ public class DatabaseManager
     /// <param name="player">
     ///   The player as a snake to have its max score updated.
     /// </param>
-    public static void UpdateMaxScore(int gameID, Snake player)
+    public static void UpdateMaxScore(UInt64 gameID, Snake player)
     {
         SendCommand($"update Players set MaxScore = {player.MaxScore} where GameID = {gameID} and PlayerID = {player.ID}");
     }
@@ -120,11 +121,11 @@ public class DatabaseManager
     /// <param name="player">
     ///   The player as a snake to have its end time updated.
     /// </param>
-    public static void SetPlayerEndTime(int gameID, Snake player)
+    public static void SetPlayerEndTime(UInt64 gameID, Snake player)
     {
         string currentTime = DateTime.Now.ToString("yyyy-MM-dd H:mm:ss");
 
-        SendCommand($"update Players set EndTime = {currentTime} where GameID = {gameID} and PlayerID = {player.ID}");
+        SendCommand($"update Players set EndTime = \"{currentTime}\" where GameID = {gameID} and PlayerID = {player.ID}");
     }
 }
 
