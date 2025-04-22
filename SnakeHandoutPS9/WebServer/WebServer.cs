@@ -126,7 +126,6 @@ public class WebServer
                 "<h3>Welcome to the Snake Games Database!</h3>" +
                 "<a href=\"/games\">View Games</a>" +
                 "</html>";
-            int contentLength = System.Text.Encoding.ASCII.GetByteCount(response);
 
             connection.Send(httpOkHeader + response);
         }
