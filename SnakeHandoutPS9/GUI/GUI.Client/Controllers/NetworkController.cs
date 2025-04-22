@@ -217,8 +217,12 @@ public class NetworkController
                             // Update max score.
                             if (oldSnake.MaxScore < newSnake.Score)
                             {
-                                oldSnake.MaxScore = newSnake.Score;
-                                DatabaseManager.UpdateMaxScore(gameID, oldSnake);
+                                newSnake.MaxScore = newSnake.Score;
+                                DatabaseManager.UpdateMaxScore(gameID, newSnake);
+                            }
+                            else
+                            {
+                                newSnake.MaxScore = oldSnake.MaxScore;
                             }
                         }
 
