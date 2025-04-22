@@ -52,7 +52,7 @@ public class HttpServerExample
             Console.WriteLine(recivedLine);
 
             // split on the '=' so we can extract what comes after. 
-            string gameIDParsed = recivedLine.Split('=')[1];
+            string gameIDParsed = recivedLine.Split('=')[1].Split(' ')[0];
 
             // if the gameID can be converted to an int, store this as gameID, else go to else
             if (int.TryParse(gameIDParsed, out int gameID))
@@ -87,7 +87,7 @@ public class HttpServerExample
                 }
             }
         }
-        else if (recivedLine.Equals("GET /games"))
+        else if (recivedLine.Equals("GET /games HTTP/1.1"))
         {
 
             // server the some Page
@@ -101,14 +101,14 @@ public class HttpServerExample
                 using var reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    response += $"<tr><td><a href=\"/games?gid={reader["GameID"]}\"></a></td><td>{reader["StartTime"]}</td><td>{reader["EndTime"]}</td></tr>";
+                    response += $"<tr><td><a href=\"/games?gid={reader["GameID"]}\">{reader["GameID"]}</a></td><td>{reader["StartTime"]}</td><td>{reader["EndTime"]}</td></tr>";
                 }
 
                 response += "</tbody></table></html>";
                 connection.Send(httpOkHeader + response);
             }
         }
-        else if (recivedLine.Equals("GET /"))
+        else if (recivedLine.Equals("GET / HTTP/1.1"))
         {
             string response = "<html>" +
                 "<h3>Welcome to the Snake Games Database!</h3>" +
@@ -122,7 +122,8 @@ public class HttpServerExample
             //serve not found page. 
             connection.Send(httpBadHeader);
         }
-            //always disconnect
-            connection.Disconnect();
+        
+        //always disconnect
+        connection.Disconnect();
     }
 }
