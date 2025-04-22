@@ -1,4 +1,8 @@
 ﻿using CS3500.Networking;
+using GUI.Client.Controllers;
+using MySql.Data.MySqlClient;
+using System.Xml.Linq;
+using WebServer;
 
 
 /// <summary>
@@ -51,47 +55,77 @@ public class HttpServerExample
 
         string recivedLine = connection.ReadLine();
 
-        if (recivedLine.Contains("GET"))
+        if (recivedLine.Contains("GET /games?gid="))    // ADDED
         {
 
             Console.WriteLine(recivedLine);
 
-            string response = "<html>" +
-                             "<body>" +
+            // split on the '=' so we can extract what comes after. 
+            string gameIDParsed = recivedLine.Split('=')[1];   // ADDED
 
-                             "<table border=10>" +
+            // if the gameID can be converted to an int, store this as gameID, else go to else
+            if (int.TryParse(gameIDParsed, out int gameID))
+            {
+                string response = "<html><h3>Stats for Game " + gameID + "</h3><table border='1'><thead><tr><td>Player ID</td><td>Player " +
+                    "Name</td><td>Max Score</td><td>Enter Time</td><td>Leave Time</td></tr></thead><tbody>";
 
-                             "<tr>" + "<td> Player name: Ahmad </td>" + "</tr>" +
-                             "<tr>" + "<td> Player socre: 20 </td>" + "</tr>" +
+                using (var conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    using var command = new MySqlCommand($"SELECT PlayerID, Name, MaxScore, StartTime, EndTime FROM Players WHERE GameID = {gameID}", conn);
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        int playerID = reader.GetInt32("PlayerID");
+                        string name = reader.GetString("Name");
+                        int maxScore = reader.GetInt32("MaxScore");
+
+                        string? startTime = reader["StartTime"].ToString();
+                        if (startTime == null)
+                            startTime = "TBD";
+
+                        string? endTime = reader["EndTime"].ToString();
+                        if (endTime == null)
+                            endTime = "TBD";
+
+                        response += $"<tr><td>{playerID}</td><td>{name}</td><td>{maxScore}</td><td>{startTime}</td><td>{endTime}</td></tr>";
+                    }
+
+                    response += "</tbody></table></html>";
+                    connection.Send(httpOkHeader + response);
+                }
+            }
+
+            else if (recivedLine.Contains("GET /games"))
+            {
+
+                // server the some Page
+                string response = "<html><h3>All Games </h3><table border='1'><thead><tr><td>ID</td><td>Start" +
+                    "<td>End</td></tr></thead><tbody>";
 
 
+                using (var conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    using var command = new MySqlCommand($"SELECT GameID, StartTime, EndTime FROM Games", conn);
+                    using var reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
 
-                             "</tabe>" +
+                        connection.Send(httpOkHeader + "Some Page Html page ");
+                    }
+                    response += $"<tr><td>{playerID}</td><td>{name}</td><td>{maxScore}</td><td>{startTime}</td><td>{endTime}</td></tr>";
 
+                }
+            }
+            else
+            {
+                //serve not found page. 
+                connection.Send(httpBadHeader);
+            }
 
-
-                             "</body>" +
-
-
-                             "</html>";
-            connection.Send(httpOkHeader + response);
+            //always disconnect
+            connection.Disconnect();
         }
-
-        else if (recivedLine.Contains("GET /SomePage"))
-        {
-
-            // server the some Page
-
-            connection.Send(httpOkHeader + "Some Page Html page ");
-        }
-        else
-        {
-
-            //serve not found page. 
-            connection.Send(httpBadHeader);
-        }
-
-        //always disconnect
-        connection.Disconnect();
     }
 }
