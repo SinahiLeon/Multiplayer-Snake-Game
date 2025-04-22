@@ -19,7 +19,9 @@ public class HttpServerExample
     private const string httpOkHeader =
         "HTTP/1.1 200 OK\r\n" +
         "Connection: close\r\n" +
-        "Content-Type: text/html; charset=UTF-8\r\n\r\n";
+        "Content-Type: text/html; charset=UTF-8\r\n" +
+        "Content-Length: ";
+
 
     private const string httpBadHeader =
         "HTTP/1.1 404 Not Found\r\n" +
@@ -83,7 +85,9 @@ public class HttpServerExample
                     }
 
                     response += "</tbody></table></html>";
-                    connection.Send(httpOkHeader + response);
+                    int contentLength = System.Text.ASCIIEncoding.ASCII.GetByteCount(response);
+
+                    connection.Send(httpOkHeader + contentLength + "\r\n\r\n" + response);
                 }
             }
         }
@@ -105,8 +109,10 @@ public class HttpServerExample
                 }
 
                 response += "</tbody></table></html>";
-                connection.Send(httpOkHeader + response);
+           
             }
+            int contentLength = response.Length;
+            connection.Send(httpOkHeader + contentLength + "\r\n\r\n" + response);
         }
         else if (recivedLine.Equals("GET / HTTP/1.1"))
         {
@@ -114,13 +120,14 @@ public class HttpServerExample
                 "<h3>Welcome to the Snake Games Database!</h3>" +
                 "<a href=\"/games\">View Games</a>" +
                 "</html>";
+            int contentLength = System.Text.ASCIIEncoding.ASCII.GetByteCount(response);
 
-            connection.Send(httpOkHeader + response);
+            connection.Send(httpOkHeader + contentLength + "\r\n\r\n" + response);
         }
         else
         {
             //serve not found page. 
-            connection.Send(httpBadHeader);
+            connection.Send(httpBadHeader + "<html><title>404 Page Not Found</title></html>");
         }
         
         //always disconnect
