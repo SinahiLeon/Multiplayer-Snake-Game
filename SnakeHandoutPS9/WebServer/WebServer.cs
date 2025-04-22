@@ -1,5 +1,4 @@
-﻿using CS3500.Networking;
-using GUI.Client.Controllers;
+﻿using GUI.Client.Controllers;
 using MySql.Data.MySqlClient;
 using System.Xml.Linq;
 using WebServer;
@@ -45,23 +44,15 @@ public class HttpServerExample
 
     private static void HandleConnect(NetworkConnection connection)
     {
-
-
-
-        // do an sql connection 
-        // query the needed information. 
-
-
-
         string recivedLine = connection.ReadLine();
 
-        if (recivedLine.Contains("GET /games?gid="))    // ADDED
+        if (recivedLine.StartsWith("GET /games?gid="))
         {
 
             Console.WriteLine(recivedLine);
 
             // split on the '=' so we can extract what comes after. 
-            string gameIDParsed = recivedLine.Split('=')[1];   // ADDED
+            string gameIDParsed = recivedLine.Split('=')[1];
 
             // if the gameID can be converted to an int, store this as gameID, else go to else
             if (int.TryParse(gameIDParsed, out int gameID))
@@ -95,37 +86,43 @@ public class HttpServerExample
                     connection.Send(httpOkHeader + response);
                 }
             }
+        }
+        else if (recivedLine.Equals("GET /games"))
+        {
 
-            else if (recivedLine.Contains("GET /games"))
+            // server the some Page
+            string response = "<html><h3>All Games </h3><table border='1'><thead><tr><td>ID</td><td>Start" +
+                "<td>End</td></tr></thead><tbody>";
+
+            using (var conn = new MySqlConnection(connectionString))
             {
-
-                // server the some Page
-                string response = "<html><h3>All Games </h3><table border='1'><thead><tr><td>ID</td><td>Start" +
-                    "<td>End</td></tr></thead><tbody>";
-
-
-                using (var conn = new MySqlConnection(connectionString))
+                conn.Open();
+                using var command = new MySqlCommand($"SELECT GameID, StartTime, EndTime FROM Games", conn);
+                using var reader = command.ExecuteReader();
+                while (reader.Read())
                 {
-                    conn.Open();
-                    using var command = new MySqlCommand($"SELECT GameID, StartTime, EndTime FROM Games", conn);
-                    using var reader = command.ExecuteReader();
-                    while (reader.Read())
-                    {
-
-                        connection.Send(httpOkHeader + "Some Page Html page ");
-                    }
-                    response += $"<tr><td>{playerID}</td><td>{name}</td><td>{maxScore}</td><td>{startTime}</td><td>{endTime}</td></tr>";
-
+                    response += $"<tr><td><a href=\"/games?gid={reader["GameID"]}\"></a></td><td>{reader["StartTime"]}</td><td>{reader["EndTime"]}</td></tr>";
                 }
-            }
-            else
-            {
-                //serve not found page. 
-                connection.Send(httpBadHeader);
-            }
 
+                response += "</tbody></table></html>";
+                connection.Send(httpOkHeader + response);
+            }
+        }
+        else if (recivedLine.Equals("GET /"))
+        {
+            string response = "<html>" +
+                "<h3>Welcome to the Snake Games Database!</h3>" +
+                "<a href=\"/games\">View Games</a>" +
+                "</html>";
+
+            connection.Send(httpOkHeader + response);
+        }
+        else
+        {
+            //serve not found page. 
+            connection.Send(httpBadHeader);
+        }
             //always disconnect
             connection.Disconnect();
-        }
     }
 }
