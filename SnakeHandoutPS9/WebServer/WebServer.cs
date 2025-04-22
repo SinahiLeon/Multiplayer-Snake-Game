@@ -1,13 +1,19 @@
-﻿using GUI.Client.Controllers;
+﻿// <summary>
+//   Defines a webserver to display game high scores for a snake game.
+// </summary>
+// <author> D. Mason Hair and Sinahi Leon </author>
+// <data> 4/22/2025 </date>
+
+using GUI.Client.Controllers;
 using MySql.Data.MySqlClient;
 using System.Xml.Linq;
-using WebServer;
 
+namespace WebServer;
 
 /// <summary>
 ///   A simple Http server example.
 /// </summary>
-public class HttpServerExample
+public class WebServer
 {
     /// <summary>
     /// The connection string for connecting to our database.
@@ -15,21 +21,25 @@ public class HttpServerExample
     private const string connectionString = "server=atr.eng.utah.edu;" +
         "database=u1312051;uid=u1312051;password=Sinahi123";
 
-
+    /// <summary>
+    /// The http OK header used to indicate that the page was found and 
+    /// used to specify attributes of the page that this server will send.
+    /// </summary>
     private const string httpOkHeader =
         "HTTP/1.1 200 OK\r\n" +
         "Connection: close\r\n" +
         "Content-Type: text/html; charset=UTF-8\r\n" +
-        "Content-Length: ";
+        "\r\n";
 
-
+    /// <summary>
+    /// The http Bad header used to indicate that the page was not found and 
+    /// used to specify attributes of the page that this server will send.
+    /// </summary>
     private const string httpBadHeader =
         "HTTP/1.1 404 Not Found\r\n" +
         "Connection: close\r\n" +
         "Content-Type: text/html; charset=UTF-8\r\n" +
         "\r\n";
-
-
 
     /// <summary>
     ///   The main program.
@@ -42,17 +52,17 @@ public class HttpServerExample
         Console.Read(); // don't stop the program.
     }
 
-
-
+    /// <summary>
+    ///   Handles the client connection to this server.
+    /// </summary>
+    /// <param name="connection"> The client connection that this server uses to communicate with the client. </param>
     private static void HandleConnect(NetworkConnection connection)
     {
         string recivedLine = connection.ReadLine();
 
+        // If a specific game page is requrested send the game page.
         if (recivedLine.StartsWith("GET /games?gid="))
         {
-
-            Console.WriteLine(recivedLine);
-
             // split on the '=' so we can extract what comes after. 
             string gameIDParsed = recivedLine.Split('=')[1].Split(' ')[0];
 
@@ -85,16 +95,13 @@ public class HttpServerExample
                     }
 
                     response += "</tbody></table></html>";
-                    int contentLength = System.Text.ASCIIEncoding.ASCII.GetByteCount(response);
-
-                    connection.Send(httpOkHeader + contentLength + "\r\n\r\n" + response);
+                    connection.Send(httpOkHeader + response);
                 }
             }
         }
+        // If the games page is requrested send the games page.
         else if (recivedLine.Equals("GET /games HTTP/1.1"))
         {
-
-            // server the some Page
             string response = "<html><h3>All Games </h3><table border='1'><thead><tr><td>ID</td><td>Start" +
                 "<td>End</td></tr></thead><tbody>";
 
@@ -109,27 +116,26 @@ public class HttpServerExample
                 }
 
                 response += "</tbody></table></html>";
-           
+                connection.Send(httpOkHeader + response);
             }
-            int contentLength = response.Length;
-            connection.Send(httpOkHeader + contentLength + "\r\n\r\n" + response);
         }
+        // If the home page is requested, send the home page.
         else if (recivedLine.Equals("GET / HTTP/1.1"))
         {
             string response = "<html>" +
                 "<h3>Welcome to the Snake Games Database!</h3>" +
                 "<a href=\"/games\">View Games</a>" +
                 "</html>";
-            int contentLength = System.Text.ASCIIEncoding.ASCII.GetByteCount(response);
+            int contentLength = System.Text.Encoding.ASCII.GetByteCount(response);
 
-            connection.Send(httpOkHeader + contentLength + "\r\n\r\n" + response);
+            connection.Send(httpOkHeader + response);
         }
+        // If an invalid page is requested, send the invalid page.
         else
         {
-            //serve not found page. 
-            connection.Send(httpBadHeader + "<html><title>404 Page Not Found</title></html>");
+            connection.Send(httpBadHeader + "<html><h1>404 Page Not Found</h1></html>");
         }
-        
+
         //always disconnect
         connection.Disconnect();
     }
