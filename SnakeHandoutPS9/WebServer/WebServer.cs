@@ -28,8 +28,7 @@ public class WebServer
     private const string httpOkHeader =
         "HTTP/1.1 200 OK\r\n" +
         "Connection: close\r\n" +
-        "Content-Type: text/html; charset=UTF-8\r\n" +
-        "\r\n";
+        "Content-Type: text/html; charset=UTF-8\r\n";
 
     /// <summary>
     /// The http Bad header used to indicate that the page was not found and 
@@ -38,8 +37,7 @@ public class WebServer
     private const string httpBadHeader =
         "HTTP/1.1 404 Not Found\r\n" +
         "Connection: close\r\n" +
-        "Content-Type: text/html; charset=UTF-8\r\n" +
-        "\r\n";
+        "Content-Type: text/html; charset=UTF-8\r\n";
 
     /// <summary>
     ///   The main program.
@@ -95,8 +93,13 @@ public class WebServer
                     }
 
                     response += "</tbody></table></html>";
-                    connection.Send(httpOkHeader + response);
+                    connection.Send(httpOkHeader + $"Content-Length: {System.Text.ASCIIEncoding.UTF8.GetByteCount(response)}\r\n\r\n" + response);
                 }
+            }
+            else
+            {
+                string response = "<html><h1>404 Page Not Found</h1></html>";
+                connection.Send(httpBadHeader + $"Content-Length: {System.Text.ASCIIEncoding.UTF8.GetByteCount(response)}\r\n\r\n" + response);
             }
         }
         // If the games page is requrested send the games page.
@@ -116,7 +119,7 @@ public class WebServer
                 }
 
                 response += "</tbody></table></html>";
-                connection.Send(httpOkHeader + response);
+                connection.Send(httpOkHeader + $"Content-Length: {System.Text.ASCIIEncoding.UTF8.GetByteCount(response)}\r\n\r\n" + response);
             }
         }
         // If the home page is requested, send the home page.
@@ -127,12 +130,13 @@ public class WebServer
                 "<a href=\"/games\">View Games</a>" +
                 "</html>";
 
-            connection.Send(httpOkHeader + response);
+            connection.Send(httpOkHeader + $"Content-Length: {System.Text.ASCIIEncoding.UTF8.GetByteCount(response)}\r\n\r\n" + response);
         }
         // If an invalid page is requested, send the invalid page.
         else
         {
-            connection.Send(httpBadHeader + "<html><h1>404 Page Not Found</h1></html>");
+            string response = "<html><h1>404 Page Not Found</h1></html>";
+            connection.Send(httpBadHeader + $"Content-Length: {System.Text.ASCIIEncoding.UTF8.GetByteCount(response)}\r\n\r\n" + response);
         }
 
         //always disconnect
